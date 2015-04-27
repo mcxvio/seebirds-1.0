@@ -82,8 +82,7 @@ jQuery.extend({
 			var rtype = "subnational2";
 			var regex = /-/gi;
 			
-			if (subregion.match(regex).length == 1)
-			{
+			if (subregion.match(regex).length == 1) {
 				rtype = "subnational1";
 			}
 			
@@ -192,9 +191,11 @@ jQuery.extend({
 
 jQuery.extend({
 	getNotablesTable: function(data, selection) {
+        /*
 		var table = $.buildTableHeaders("notables", "tablesorter", "Species Name", "Location", "Count", "Date / Checklist");
+        */
 		var tbody = document.createElement('tbody');
-
+        
 		for (var i = 0; i < data.length; i++) {
 			var row = document.createElement('tr');
 			
@@ -211,8 +212,11 @@ jQuery.extend({
 			tbody.appendChild(row);
 		}
 		
+        return tbody;
+        /*
 		table.appendChild(tbody);
 		return table;
+        */
 	}
 });
 
