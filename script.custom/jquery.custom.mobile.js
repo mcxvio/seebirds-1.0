@@ -167,7 +167,7 @@ jQuery.extend({
 				// add new row, i.e., check-list.
 				var row = document.createElement('tr');
 
-				var locName = '<a href="#" class="gotoLocation" title="' + data[i-1].locID + '" target="_self">' + data[i-1].locName + '</a>';
+				var locName = '<a href="#location" class="gotoLocation" title="' + data[i-1].locID + '" target="_self">' + data[i-1].locName + '</a>';
 				var howMany = speciesCount;
 				var obsDt = data[i-1].obsDt;
 				
@@ -198,7 +198,7 @@ jQuery.extend({
 		for (var i = 0; i < data.length; i++) {
 			var row = document.createElement('tr');
 			
-			var species = '<a href="#" class="gotoSpecies" title="'+ data[i].comName + ' (' + data[i].sciName + ')' + '" target="_self">' + data[i].comName + '</a>';
+			var species = '<a href="#species" class="gotoSpecies" title="'+ data[i].comName + ' (' + data[i].sciName + ')' + '" target="_self">' + data[i].comName + '</a>';
 			var obsDt = '<a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a>';
 			var howMany = data[i].howMany || 'X'; //ternary operator.
 			var locName = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
@@ -218,13 +218,13 @@ jQuery.extend({
 
 jQuery.extend({
 	getLocationTable: function(data, selection) {
-		var table = $.buildTableHeaders("location", "tablesorter", "Species Name", "Count", "Date / Checklist", "");
+		var table = $.buildTableHeaders("locationTable", "tablesorter", "Species Name", "Count", "Date / Checklist", "");
 		var tbody = document.createElement('tbody');
 
 		for (var i = 0; i < data.length; i++) {
 			var row = document.createElement('tr');
 			
-			var species = '<a href="#" class="gotoSpecies" title="'+ data[i].comName + ' (' + data[i].sciName + ')' + '" target="_self">' + data[i].comName + '</a>';
+			var species = '<a href="#species" class="gotoSpecies" title="'+ data[i].comName + ' (' + data[i].sciName + ')' + '" target="_self">' + data[i].comName + '</a>';
 			var howMany = data[i].howMany || 'X'; //ternary operator.
 			var obsDt = '<a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt;
 			
@@ -242,13 +242,13 @@ jQuery.extend({
 
 jQuery.extend({
 	getSpeciesTable: function(data, regName) {
-		var table = $.buildTableHeaders("species", "tablesorter", "Location / Hotspot", "Count", "Date", "");
+		var table = $.buildTableHeaders("speciesTable", "tablesorter", "Location / Hotspot", "Count", "Date", "");
 		var tbody = document.createElement('tbody');
 
 		for (var i = 0; i < data.length; i++) {
 			var row = document.createElement('tr');
 
-			var location = '<a href="#" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
+			var location = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
 			var count = data[i].howMany || 'X';
 			var date = data[i].obsDt;
 
