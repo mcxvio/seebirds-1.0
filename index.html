@@ -40,8 +40,8 @@
 	<script src="script.tablesorter/jquery.tablesorter.min.js"></script>
 	<script src="script.custom/jquery.custom.js"></script>
 	<script>
-		//var urlBase = "http://huntsebirds.appspot.com/";
-		var urlBase = "http://localhost:8080/ebirds/";
+		var urlBase = "http://huntsebirds.appspot.com/";
+		//var urlBase = "http://localhost:8080/mebird/";
 		var dataFile = "ebird_api_ref_list_test.xml";
 		var noDataFound = "<p>No species sightings found.</p>";
 
@@ -139,7 +139,7 @@
 					
 					if (data.length > 0) {
 						var table = (api == "checklists") ? $.getChecklistsTable(data, selection) : $.getNotablesTable(data, selection);
-						$("#results").html(table.outerHTML);
+						$("#results").html(table);
 						
 						if (api == "checklists") {
 							$("#message").html("<p>Checklists with number of species seen most recently in " + selection + ", in last 5 days: " + (table.rows.length-1) + ".</p>");

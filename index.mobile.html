@@ -31,10 +31,11 @@
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="script.tablesorter/jquery.tablesorter.min.js"></script>
-    <script src="script.custom/jquery.custom.js"></script>
+    <script src="script.custom/jquery.custom.mobile.js"></script>
     <!-- jQM -->
     <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+	<!-- end jQM -->
     <script>
         //var urlBase = "http://huntsebirds.appspot.com/";
         var urlBase = "http://localhost:8080/mebird/";
@@ -62,47 +63,62 @@
                 $.mobile.loading( "hide" );
             });
             
-            $(".gotoHome").click(function () {
-                document.title = "meBird";
-
-                $(homePage).show();
-                $(search).hide();
-                
-                $("#results").html("");
-                $("#message").html("");
-            });
-
             $(gotoChecklists).on("click", function () {
-                document.title = "meBird | checklists";
-                
-                $(homePage).hide();
-                $(search).show();
-                $(tags).focus();                
-                
-                $(function() {
-                    var tags = $.getAutocompleteNameTags(urlBase + dataFile);
-                    $("#tags").autocomplete({
-                        source: tags
-                    });
+                //document.title = "meBird | checklists";
+                var tags = $.getAutocompleteNameTags(urlBase + dataFile);
+                $("#checklistsTags").autocomplete({
+                    source: tags
                 });
             });
             
-            $(gotoNotables).on("click", function () {
-                document.title = "meBird | notables";
-
-                $(homePage).hide();
-                $(search).show();
-                $(tags).focus();
-                $(notables).show();
-                
-                $(function() {
-                    var tags = $.getAutocompleteNameTags(urlBase + dataFile);
-                    $("#tags").autocomplete({
-                        source: tags
-                    });
-                });
+            $(gotoNotables).click(function () {
+                //document.title = "meBird | notables";
+				var tags = $.getAutocompleteNameTags(urlBase + dataFile);
+				$("#notablesTags").autocomplete({
+					source: tags
+				});
             });
 
+			$(notablesTarget).click(function () {
+				var selection = $("#notablesTags").val();
+
+                if (selection.length > 0) {
+					var url = $.geteBirdApiUrl(selection, "notables");
+					data = $.getValues(url, "json");
+                    
+					if (data.length > 0) {
+						var table = $.getNotablesTable(data, selection);
+						$("#notablesMessage").html("<p>Notable species for " + selection + ", in last 5 days: " + data.length + ".</p>");
+                        $("#notablesResults").html(table);
+						$("#notablesTable").tablesorter();
+					} else {
+						$("#notablesMessage").html(noDataFound);
+					}
+				} else {
+                    $("#notablesMessage").html("<p>Enter State or County, select, then click 'Go'</p>");
+                }
+			});
+
+			$(checklistsTarget).click(function () {
+				var selection = $("#checklistsTags").val();
+
+                if (selection.length > 0) {
+					var url = $.geteBirdApiUrl(selection, "checklists");
+					data = $.getValues(url, "json");
+                    
+					if (data.length > 0) {
+						var table = $.getChecklistsTable(data, selection);
+						$("#checklistsMessage").html("<p>Checklists with number of species seen most recently in " + selection + ", in last 5 days: " + (table.rows.length-1) + ".</p>");
+                        $("#checklistsResults").html(table);
+						$("#checklistsTable").tablesorter();
+					} else {
+						$("#checklistsMessage").html(noDataFound);
+					}
+				} else {
+                    $("#checklistsMessage").html("<p>Enter State or County, select, then click 'Go'</p>");
+                }
+			});
+			
             $(target).click(function() {
                 $("#results").html("");
                 var selection = $("#tags").val();
@@ -200,6 +216,8 @@
             $(document).on("click", "a.gotoLocation", function() {
                 var location = $(this).attr('title');
                 var region = sessionStorage.getItem("region");
+                
+                alert(location);
 
                 document.title = "meBird | location";
                 $("#results").html("");
@@ -218,36 +236,41 @@
                     $("#message").html(noDataFound);
                 }
             });
+		
         });
     </script>
 </head>
 <body>
 <div data-role="page" id="home">
-    <div data-role="header"><h1><a class="gotoHome" href="#">meBird 1.1</a></h1></div>
+    <div data-role="header"><h1><a class="gotoHome" href="index.mobile.html">meBird 1.1</a></h1></div>
     <div id="homePage" data-role="navbar">
         <ul><li><a id="gotoChecklists" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-action" href="#checklists">checklists</a></li><li><a id="gotoNotables" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-action" href="#notables">notables</a></li></ul>
     </div>
-    <div id="search" class="centerbox" style="display:none">
-        <input id="tags" type="text" autofocus="autofocus" placeholder="Enter State or County, select, then click 'Go'">
-        <button id="target" class="show-page-loading-msg" data-textonly="false" data-textvisible="true" data-msgtxt="" data-inline="true"><a href="#notables">Go</a></button>
-    </div>
-    <!--<div id="testData"></div>-->
-    <div id="message"></div>
-    <div id="results" class="hide-page-loading-msg"></div>
 </div>
 <div data-role="page" id="checklists">
-    <div data-role="header"><h1><a class="gotoHome" href="#">meBird 1.1</a></h1></div>
-    <div id="checklistsMessage"></div>
-    <div id="checklistsResults">
-        <table id="checklistsTable" class="tablesorter"><thead><th>Location / Hotspot</th><th>Recent Species</th><th>Date/Time</th></thead><tbody id="notablesBody"></tbody></table>
+    <div data-role="header"><h1><a class="gotoHome" href="index.mobile.html">meBird 1.1</a></h1></div>
+	<div role="main" class="ui-content">
+		<div id="checklistsSearch" class="centerbox">
+			<input id="checklistsTags" type="text" autofocus="autofocus" placeholder="Enter State or County, select, then click 'Go'">
+			<button id="checklistsTarget" class="show-page-loading-msg ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-search" data-textonly="false" data-textvisible="true" data-msgtxt="" data-inline="true">Go</button>
+		</div>
+        <div id="checklistsMessage"></div>
+        <div id="checklistsResults"></div>
     </div>
 </div>
 <div data-role="page" id="notables">
-    <div data-role="header"><h1><a class="gotoHome" href="#">meBird 1.1</a></h1></div>
-    <div id="notablesMessage"></div>
-    <div id="notablesResults">
-        <table id="notablesTable" class="tablesorter"><thead><th>Name</th><th>Location</th><th>Count</th><th>Date/Time</th></thead><tbody id="notablesBody"></tbody></table>
-    </div>
+    <div data-role="header"><h1><a class="gotoHome" href="index.mobile.html">meBird 1.1</a></h1></div>
+	<div role="main" class="ui-content">
+		<div id="notablesSearch" class="centerbox">
+			<input id="notablesTags" type="text" autofocus="autofocus" placeholder="Enter State or County, select, then click 'Go'">
+			<button id="notablesTarget" class="show-page-loading-msg ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-search" data-textonly="false" data-textvisible="true" data-msgtxt="" data-inline="true">Go</button>
+		</div>
+        <div id="notablesMessage"></div>
+		<div id="notablesResults"></div>
+	</div>
 </div>
+<div data-role="page" id="results"><!-- Results --></div>
+<div data-role="page" id="location"><!-- Locations --></div>
+<div data-role="page" id="species"><!-- Species --></div>
 </body>
 </html>
