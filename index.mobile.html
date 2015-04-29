@@ -217,7 +217,7 @@
             });
     
             $(document).pagecontainer({ beforeshow: function( event, ui ) { } });
-                
+            // Do this once within a different event?
             $(document).on("pagecontainerbeforeshow", function(event, ui){
                 var toPage = ui.toPage[0].id;
                 
@@ -238,7 +238,7 @@
         <h1><a href="index.mobile.html">home</a></h1>
     </div>
     <div role="main" class="iu-content">
-        <ul data-role="listview"><li><a id="gotoChecklists" href="#checklists">checklists</a></li><!--class="ui-btn ui-btn-icon-top ui-icon-action"-->
+        <ul data-role="listview"><li><a id="gotoChecklists" href="#checklists">checklists</a></li>
         <li><a id="gotoNotables" href="#notables">notables</a></li></ul>
     </div>
     <div data-role="footer" data-position="fixed" class="centerbox">
@@ -249,9 +249,9 @@
 <div data-role="page" id="checklists" data-title="mebd | checklists">
     <div data-role="header" data-id="site-header">
         <h1><a href="index.mobile.html">home</a></h1>
-        <div data-role="navbar">
-            <ul><li><a id="gotoChecklists" class="ui-btn ui-btn-icon-top ui-icon-action ui-btn-active ui-state-persist" href="#checklists">checklists</a></li>
-            <li><a id="gotoNotables" class="ui-btn ui-btn-icon-top ui-icon-action" href="#notables">notables</a></li></ul>
+        <div>
+            <ul data-role="listview"><li><a id="gotoChecklists" href="#checklists" class="ui-btn ui-btn-active ui-state-persist">checklists</a></li>
+            <li><a id="gotoNotables" href="#notables">notables</a></li></ul>
         </div>
     </div>
     <div role="main" class="ui-content">
@@ -266,9 +266,9 @@
 <div data-role="page" id="notables" data-title="mebd | notables">
     <div data-role="header" data-id="site-header">
         <h1><a href="index.mobile.html">home</a></h1>
-        <div data-role="navbar">
-            <ul><li><a id="gotoChecklists" class="ui-btn ui-btn-icon-top ui-icon-action" href="#checklists">checklists</a></li>
-            <li><a id="gotoNotables" class="ui-btn ui-btn-icon-top ui-icon-action ui-btn-active ui-state-persist" href="#notables">notables</a></li></ul>
+        <div>
+            <ul data-role="listview"><li><a id="gotoChecklists" href="#checklists">checklists</a></li>
+            <li><a id="gotoNotables" href="#notables" class="ui-btn ui-btn-active ui-state-persist">notables</a></li></ul>
         </div>
     </div>
     <div role="main" class="ui-content">
