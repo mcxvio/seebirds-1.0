@@ -25,14 +25,13 @@
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <!-- end jQM -->
     <script>
-        //var urlBase = "http://huntsebirds.appspot.com/";
-        var urlBase = "http://localhost:8080/mebird/";
+        var urlBase = "http://huntsebirds.appspot.com/";
+        //var urlBase = "http://localhost:8080/mebird/";
         var dataFile = "ebird_api_ref_list_test.xml";
         var noDataFound = "<p>No species sightings found.</p>";
 
         (function( $ ) {
             $(function() { // On document ready
-            
                 $(document).on("ajaxSend", function() {
                     var $this = $( this ),
                         theme = $this.jqmData( "theme" ) || $.mobile.loader.prototype.options.theme,
@@ -51,340 +50,282 @@
                 .on("ajaxStop", function() {
                     $.mobile.loading( "hide" );
                 });
-                
-                $(notablesTarget).click(function () {
-                    var selection = $("#notables #tags").val();
-                    sessionStorage.setItem("region", selection);                    
-
-                    if (selection.length > 0) {
-                        var url = $.geteBirdApiUrl(selection, "notables");
-                        data = $.getValues(url, "json");
-                        
-                        if (data.length > 0) {
-                            var table = $.getNotablesTable(data, selection);
-                            $("#notablesMessage").html("<p>Notable species for " + selection + ", in last 5 days: " + data.length + ".</p>");
-                            $("#notablesResults").html(table);
-                            $("#notablesTable").tablesorter();
-                        } else {
-                            $("#notablesMessage").html(noDataFound);
-                        }
-                    } else {
-                        $("#notablesMessage").html("<p>Enter State or County, select, then click 'Go'</p>");
-                    }
-                });
-
-                $(checklistsTarget).click(function () {
-                    var selection = $("#checklists #tags").val();
-                    sessionStorage.setItem("region", selection);                    
-
-                    if (selection.length > 0) {
-                        var url = $.geteBirdApiUrl(selection, "checklists");
-                        data = $.getValues(url, "json");
-                        
-                        if (data.length > 0) {
-                            var table = $.getChecklistsTable(data, selection);
-                            $("#checklistsMessage").html("<p>Checklists with number of species seen most recently in " + selection + ", in last 5 days: " + (table.rows.length-1) + ".</p>");
-                            $("#checklistsResults").html(table);
-                            $("#checklistsTable").tablesorter();
-                        } else {
-                            $("#checklistsMessage").html(noDataFound);
-                        }
-                    } else {
-                        $("#checklistsMessage").html("<p>Enter State or County, select, then click 'Go'</p>");
-                    }
-                });
             });
             
-            /*$(target).click(function() {
-                $("#results").html("");
-                var selection = $("#tags").val();
+            var selectedData = {
+                region: "",
+                locId: "",
+                locName: "",
+                sciName: "",
+                comName: ""
+            }
 
-                //sessionStorage.removeItem("results");
-                
-                if (selection.length > 0) {
-                    var api = (document.title.indexOf("checklists") > -1) ? "checklists" : "notables";
-                    document.title = "meBird | " + api;
-                    var data = "";
+            // Load autocomplete values & handle selection.
+            $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
+                console.log("pagecreate entry");
+                var page = $(this).attr("id");
+                if (page == "checklists" || page == "notables") {
+                    var xml = $.getValues(urlBase + dataFile, "xml");
+                    var filteredList = $(xml).filterNode("region");
                     
-                    // If region has changed, call eBird for fresh data.
-                    var calleBird = false;
-                    if (sessionStorage.getItem("region") == null) {
-                        sessionStorage.setItem("region", selection);
-                    } else {
-                        var prevRegion = sessionStorage.getItem("region");
-                        if (prevRegion != selection) {
-                            calleBird = true;
-                            sessionStorage.setItem("region", selection);
+                    var tags = (page == "checklists") ? "#autocomplete-items-checklists" : "#autocomplete-items-notables";
+                    
+                    $(tags).on("filterablebeforefilter", function ( e, data ) {
+                        var $ul = $( this ),
+                            $input = $( data.input ),
+                            value = $input.val(),
+                            html = "";
+                        $ul.html( "" );
+                
+                        if (value && value.length > 1) {
+                            $ul.html( "<li><div class='ui-loader'><span class='ui-icon ui-icon-loading'></span></div></li>" );
+                            $ul.listview( "refresh" );
+                
+                            var val;
+                            $(filteredList).each(function () {
+                                val = $(this).filterNode("name").text() + " (" + ($(this).filterNode("subnational2-code").text() || $(this).filterNode("subnational1-code").text()) + ")"
+                                html += "<li><a href='#sightings' class='gotoRegion'>" + val + "</a></li>";
+                            });
+                            
+                            $ul.html( html );
+                            $ul.listview("refresh");
+                            $ul.trigger("updatelayout");
                         }
-                    }
-                    
-                    // Call eBird or use cached data.
-                    if (sessionStorage.getItem("results") == null || calleBird) {
-                        var url = $.geteBirdApiUrl(selection, api);
-                        data = $.getValues(url, "json");
-                        
-                        var storedData = JSON.stringify(data);
-                        sessionStorage.setItem("results", storedData);
-                        
-                        //$("#testData").html("...ebird data...");
-                    } else {
-                        var storedData = sessionStorage.getItem("results");
-                        if (storedData != null) {
-                            data = JSON.parse(storedData);
-                        }
-                        //$("#testData").html("...stored data...");
-                    }
-                    
-                    if (data.length > 0) {
-                        if (api == "notables") {
-                            var tbody = $.getNotablesTable(data, selection);
-
-                            $("#notablesBody").replaceWith(tbody);
-                            $("#notablesMessage").html("<p>Notable species for " + selection + ", in last 5 days: " + data.length + ".</p>");
-                            $("#notablesTable").tablesorter();
-                        } else {
-                        }
-                    
-                        var table = (api == "checklists") ? $.getChecklistsTable(data, selection) : $.getNotablesTable(data, selection);
-                        
-                        $("#results").html(table);
-
-                        if (api == "checklists") {
-                            $("#message").html("<p>Checklists with number of species seen most recently in " + selection + ", in last 5 days: " + (table.rows.length-1) + ".</p>");
-                            $("#checklists").tablesorter();
-                        } else {
-                            $("#message").html("<p>Notable species for " + selection + ", in last 5 days: " + data.length + ".</p>");
-                            $("#notables").tablesorter();
-                        }
-                    } else {
-                        $("#results").html("");
-                        $("#message").html(noDataFound);
-                    }
-                } else {
-                    $("#results").html("");
-                    $("#message").html("<p>Enter State or County, select, then click 'Go'</p>");
-                }
-            });*/
-
-            $(document).on("click", "a.gotoLocation", function() {
-                event.preventDefault();
-                var location = $(this).attr('title');
-                var region = sessionStorage.getItem("region");
-                
-                var url = $.geteBirdApiUrl(location, "location");
-                var data = $.getValues(url, "json");
-                
-                if (data.length > 0) {
-                    var table = $.getLocationTable(data, location);
-                    
-                    $("#location #results").html(table);
-                    $("#location #message").html('<p>Sightings at <a href="http://ebird.org/ebird/hotspot/' + location + '" target="_blank">' + $(this).text() + '</a> in last 14 days: ' + data.length + ".</p>");
-                    $("#locationTable").tablesorter();
-                } else {
-                    $("#location #results").html("");
-                    $("#location #message").html(noDataFound);
-                }
-                
-                //initialize the new page 
-                $.mobile.initializePage();
-                //navigate to the new page
-                $.mobile.changePage("#location", "fade", false, true);
-            });
-        
-            $(document).on("click", "a.gotoSpecies", function() {
-                event.preventDefault();
-                var sciName = $.getSubRegionFromSelection($(this).attr('title'));
-                var region = sessionStorage.getItem("region");
-
-                var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
-                var data = $.getValues(url, "json");
-
-                if (data.length > 0) {
-                    var table = $.getSpeciesTable(data, region);
-
-                    $("#species #results").html(table);
-                    $("#species #message").html("<p>Sightings of <strong>" + $(this).text() + "</strong> in " + region + " in last 14 days: " + data.length + ".</p>");
-                    $("#speciesTable").tablesorter();
-                } else {
-                    $("#species #results").html("");
-                    $("#species #message").html(noDataFound);
-                }
-                
-                //initialize the new page
-                $.mobile.initializePage();
-                //navigate to the new page
-                $.mobile.changePage("#species", "fade", false, true);
-            });
-    
-            $(document).pagecontainer({ beforeshow: function( event, ui ) { } });
-            // Do this once within a different event?
-            $(document).on("pagecontainerbeforeshow", function(event, ui){
-                var toPage = ui.toPage[0].id;
-                
-                if (toPage == "checklists" || toPage == "notables") {
-                    var tags = $.getAutocompleteNameTags(urlBase + dataFile);
-                    var tagsName = "#" + toPage + " #tags";
-                    $(tagsName).autocomplete({
-                        source: tags
                     });
                 }
             });
 
-            $(document).on("pagecreate", "#home", function() {
-                console.log('getting xml data');
-                var xml = $.getValues(urlBase + dataFile, "xml");
-                var filteredList = $(xml).filterNode("region");
+            // Save selected region from autocomplete.
+            $(document).on("click", "a.gotoRegion", function() {
+                selectedData.region = $(this).text();
+            });
+            
+            $(document).pagecontainer({ beforeshow: function(event, ui) { } });
+            // Load results data.
+            $(document).on("pagecontainerbeforeshow", function(event, ui){
+                var toPage = ui.toPage[0].id;
+                var prevPage = ui.prevPage.attr('id');
                 
-                $("#autocomplete-items").on("filterablebeforefilter", function ( e, data ) {
-                    var $ul = $( this ),
-                        $input = $( data.input ),
-                        value = $input.val(),
-                        html = "";
-                    $ul.html( "" );
-            
-                    if (value && value.length > 1) {
-                        $ul.html( "<li><div class='ui-loader'><span class='ui-icon ui-icon-loading'></span></div></li>" );
-                        $ul.listview( "refresh" );
-            
-                        var val;
-                        $(filteredList).each(function () {
-                            val = $(this).filterNode("name").text() + " (" + ($(this).filterNode("subnational2-code").text() || $(this).filterNode("subnational1-code").text()) + ")"
-                            html += "<li><a href='#sightings'>" + val + "</a></li>";
-                        });
-                        
-                        $ul.html( html );
-                        $ul.listview("refresh");
-                        $ul.trigger("updatelayout");
-            
-                        /*
-                        $.ajax({
-                            url: "http://localhost:8080/mebird/ebird_api_ref_list_test.xml",
-                            dataType: "xml",
-                            type: "get",
-                            async: false,
-                            crossDomain: false,
-                            data: {
-                                q: $input.val()
-                            },
-                            error: function(xhr, status, error) {
-                                alert(error);
+                console.log("pagecontainerbeforeshow, toPage  :" + toPage);
+                console.log("pagecontainerbeforeshow, prevPage:" + prevPage);
+                
+                if (toPage == "sightings") {
+                    var region = selectedData.region;
+                    
+                    if (region.length > 0) {
+                        var table = "";
+                        var message = "";
+                        var tableName = "";
+                    
+                        if (prevPage == "notables") {
+                            var url = $.geteBirdApiUrl(region, "notables");
+                            data = $.getValues(url, "json");
+                            
+                            if (data.length > 0) {
+                                table = $.getNotablesTable(data, region);
+                                message = "<p>Notable species for " + region + ", in last 5 days: " + data.length + ".</p>";
+                            } else {
+                                message = noDataFound;
                             }
-                        })
-                        .then( function ( response ) {
-                            var filteredList = $(response).filterNode("region");
-                            var val;
+                        }
+                        if (prevPage == "checklists") {
+                            var url = $.geteBirdApiUrl(region, "checklists");
+                            data = $.getValues(url, "json");
+                            
+                            if (data.length > 0) {
+                                table = $.getChecklistsTable(data, region);
+                                message = "<p>Checklists with number of species seen most recently in " + region + ", in last 5 days: " + (table.rows.length-1) + ".</p>";
+                            } else {
+                                message = noDataFound;
+                            }
+                        }
+                        if (table != "" && table.rows.length > 1) {
+                            $("#sightings #message").html(message);
+                            $("#sightings #results").html(table);
+                            $("#sightingsTable").tablesorter();
+                        }
+                    } else {
+                        $("#sightings #message").html("<p>Enter State or County, select, then click 'Go'</p>");
+                    }
+                }
+                if (toPage == "location") {
+                    var locId = selectedData.locId;
+                    var locName = selectedData.locName;
+                    var region = selectedData.region;
+                    
+                    console.log("gotoLocation, locId: " + locId);
+                    console.log("gotoLocation, locName: " + locName);
+                    console.log("gotoLocation, region : " + region);
+                    
+                    var url = $.geteBirdApiUrl(locId, "location");
+                    var data = $.getValues(url, "json");
+                    
+                    if (data.length > 0) {
+                        var table = $.getLocationTable(data);
+                        
+                        $("#location #results").html(table);
+                        $("#location #message").html('<p>Sightings at <a href="http://ebird.org/ebird/hotspot/' + locId + '" target="_blank">' + locName + '</a> in last 14 days: ' + data.length + ".</p>");
+                        $("#locationTable").tablesorter();
+                    } else {
+                        $("#location #results").html("");
+                        $("#location #message").html(noDataFound);
+                    }
+                }
+                if (toPage == "species") {
+                    var sciName = selectedData.sciName;
+                    var comName = selectedData.comName;
+                    var region = selectedData.region;
 
-                            $(filteredList).each(function () {
-                                val = $(this).filterNode("name").text() + " (" + ($(this).filterNode("subnational2-code").text() || $(this).filterNode("subnational1-code").text()) + ")"
-                                html += "<li><a href='#sightings'>" + val + "</a></li>";
-                            });
-                            $ul.html( html );
-                            $ul.listview("refresh");
-                            $ul.trigger("updatelayout");
-                        });
-                        */
-                    }
-                });
+                    console.log("toPage species, sciName: " + sciName);
+                    console.log("toPage species, comName: _" + comName + "_");
+                    console.log("toPage species, region : " + region);
+                    
+                    var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
+                    var data = $.getValues(url, "json");
+                    
+                    if (data.length > 0) {
+                        var table = $.getSpeciesTable(data, region);
+
+                        $("#species #results").html(table);
+                        $("#species #message").html("<p>Sightings of <strong>" + comName + "</strong> in " + region + " in last 14 days: " + data.length + ".</p>");
+                        $("#speciesTable").tablesorter();
+                    } else {
+                        $("#species #results").html("");
+                        $("#species #message").html(noDataFound);
+                    }
+                }
             });
 
+            // Load location data.
+            $(document).on("click", "a.gotoLocation", function() {
+                var locId = $(this).attr('title');
+                var locName = $(this).text();
+                selectedData.locId = locId;
+                selectedData.locName = locName;
+            });
+        
+            // Load species data.
+            $(document).on("click", "a.gotoSpecies", function() {
+                var title = $(this).attr('title');
+                var sciName = $.getSubRegionFromSelection(title);
+                var comName = title.substring(0, title.indexOf('(')-1);
+                selectedData.sciName = sciName;
+                selectedData.comName = comName;
+            });
         })( jQuery );
     </script>
 </head>
 <body>
-<!-- Home -->
-<div data-role="page" id="home" data-title="home">
-    <div data-role="header" data-id="site-header" data-position="inline">
-        <h1><a href="index.mobile.html">home</a></h1>
-    </div>
-    <div role="main" class="iu-content">
-        <ul data-role="listview"><li><a id="gotoChecklists" href="#checklists">checklists</a></li>
-        <li><a id="gotoNotables" href="#notables">notables</a></li></ul>
-
-        <form class="ui-filterable">
-            <input id="autocomplete-input" data-type="search" placeholder="Search for State or County">
-        </form>
-        <ul id="autocomplete-items" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input"></ul>
-    </div>
-    <div data-role="footer" data-position="fixed" class="centerbox">
-        <a href="#copyright" data-rel="popup" data-transition="pop">copyright</a><a href="#donate">donate</a><a href="#providers">providers</a>
-        <div data-role="popup" id="copyright"><p>All data courtesy of <a href="http://www.ebird.org" target="_blank">eBird</a></p><p>Copyright M. Hunt, 2015. All rights reserved.</p></div>
-    </div>
-</div>
-<!-- Checklists -->
-<div data-role="page" id="checklists" data-title="mebd | checklists">
-    <div data-role="panel" id="nav-panel-checklists" data-display="overlay" data-position="left">
-        <ul data-role="listview">
-        <li><a id="gotoChecklists" href="#checklists" class="ui-btn ui-btn-active">checklists</a></li>
-        <li><a id="gotoNotables" href="#notables">notables</a></li>
-        <li><a href="#checklists" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
-        </ul>
-    </div>
-    <div data-role="header" data-id="site-header">
-        <a href="#nav-panel-checklists" data-icon="bars" data-iconpos="notext">Menu</a>
-        <h1><a href="index.mobile.html">home</a></h1>
-    </div>
-    <div role="main" class="ui-content">
-        <div id="checklistsSearch" class="centerbox">
-            <input id="tags" type="text" autofocus="autofocus" placeholder="Enter State or County, select, then click 'Go'">
-            <button id="checklistsTarget" class="show-page-loading-msg ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-search" data-textonly="false" data-textvisible="true" data-msgtxt="" data-inline="true">Go</button>
+    <!-- Home -->
+    <div data-role="page" id="home" data-title="home">
+        <div data-role="header" data-id="site-header" data-position="inline">
+            <h1><a href="index.mobile.html">home</a></h1>
         </div>
-        <div id="checklistsMessage"></div>
-        <div id="checklistsResults"></div>
-    </div>
-</div>
-<!-- Notables -->
-<div data-role="page" id="notables" data-title="mebd | notables">
-    <div data-role="header" data-id="site-header">
-        <a href="#nav-panel-notables" data-icon="bars" data-iconpos="notext">Menu</a>
-        <h1><a href="index.mobile.html">home</a></h1>
-    </div>
-    <div data-role="main" class="ui-content">
-        <div id="notablesSearch" class="centerbox">
-            <input id="tags" type="text" autofocus="autofocus" placeholder="Enter State or County, select, then click 'Go'">
-            <button id="notablesTarget" class="show-page-loading-msg ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-search" data-textonly="false" data-textvisible="true" data-msgtxt="" data-inline="true">Go</button>
+        <div role="main" class="iu-content">
+            <ul data-role="listview"><li><a id="gotoChecklists" href="#checklists">checklists</a></li>
+            <li><a id="gotoNotables" href="#notables">notables</a></li></ul>
         </div>
-        <div id="notablesMessage"></div>
-        <div id="notablesResults"></div>
-    </div>
-    <div data-role="footer">
-        <div data-role="panel" id="nav-panel-notables" data-display="overlay" data-position="left">
-            <ul data-role="listview">
-            <li><a id="gotoChecklists" href="#checklists">checklists</a></li>
-            <li><a id="gotoNotables" href="#notables" class="ui-btn ui-btn-active">notables</a></li>
-            <li><a href="#notables" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>        
-            </ul>
+        <div data-role="footer" data-position="fixed" class="centerbox">
+            <a href="#copyright" data-rel="popup" data-transition="pop">copyright</a><a href="#donate">donate</a><a href="#providers">providers</a>
+            <div data-role="popup" id="copyright"><p>All data courtesy of <a href="http://www.ebird.org" target="_blank">eBird</a></p><p>Copyright M. Hunt, 2015. All rights reserved.</p></div>
         </div>
     </div>
-</div>
-<!-- Sightings -->
-<div data-role="page" id="sightings" data-title="mebd | sightings">
-    <div data-role="header" data-id="site-header">
-        <h1><a href="index.mobile.html">home</a></h1>
+    <!-- Checklists Search -->
+    <div data-role="page" id="checklists" data-title="mebd | checklists">
+        <div data-role="header" data-id="site-header">
+            <a href="#nav-panel-checklists" data-icon="bars" data-iconpos="notext">Menu</a>
+            <h1><a href="index.mobile.html">home</a></h1>
+        </div>
+        <div role="main" class="ui-content">
+            <!-- Autocomplete -->
+            <form class="ui-filterable"><input id="autocomplete-input-checklists" data-type="search" placeholder="Search for State or County" autofocus="autofocus"></form>
+            <ul id="autocomplete-items-checklists" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input-checklists"></ul>
+            <!-- Nav Panel -->
+            <div data-role="panel" id="nav-panel-checklists" data-display="overlay" data-position="left">
+                <ul data-role="listview">
+                <li><a href="#checklists" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                <li><a href="#checklists" id="gotoChecklists" class="ui-btn ui-btn-active">checklists</a></li>
+                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
-    <div role="main" class="ui-content">
-        <div id="message">Hello world</div>
-        <div id="results"></div>
+    <!-- Notables Search -->
+    <div data-role="page" id="notables" data-title="mebd | notables">
+        <div data-role="header" data-id="site-header">
+            <a href="#nav-panel-notables" data-icon="bars" data-iconpos="notext">Menu</a>
+            <h1><a href="index.mobile.html">home</a></h1>
+        </div>
+        <div data-role="main" class="ui-content">
+            <!-- Autocomplete -->
+            <form class="ui-filterable"><input id="autocomplete-input-notables" data-type="search" placeholder="Search for State or County" autofocus="autofocus"></form>
+            <ul id="autocomplete-items-notables" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input-notables"></ul>
+            <!-- Nav Panel -->
+            <div data-role="panel" id="nav-panel-notables" data-display="overlay" data-position="left">
+                <ul data-role="listview">
+                <li><a href="#notables" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                <li><a href="#notables" id="gotoNotables" class="ui-btn ui-btn-active">notables</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
-<div>
-<!-- Location -->
-<div data-role="page" id="location" data-title="mebd | location">
-    <div data-role="header" data-id="site-header" data-add-back-btn="true">
-        <h1><a href="index.mobile.html">home</a></h1>
+    <!-- Sightings Results -->
+    <div data-role="page" id="sightings" data-title="mebd | sightings">
+        <div data-role="header" data-id="site-header">
+            <a href="#nav-panel-sightings" data-icon="bars" data-iconpos="notext">Menu</a>
+            <h1><a href="index.mobile.html">home</a></h1>
+        </div>
+        <div role="main" class="ui-content">
+            <div id="message"></div>
+            <div id="results"></div>
+            <!-- Nav Panel -->
+            <div data-role="panel" id="nav-panel-sightings" data-display="overlay" data-position="left">
+                <ul data-role="listview">
+                <li><a href="#sightings" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
-    <div role="main" class="ui-content">
-        <div id="message"></div>
-        <div id="results"></div>
+    <!-- Location Results -->
+    <div data-role="page" id="location" data-title="mebd | location">
+        <div data-role="header" data-id="site-header">
+            <a href="#nav-panel-location" data-icon="bars" data-iconpos="notext">Menu</a>
+            <h1><a href="index.mobile.html">home</a></h1>
+        </div>
+        <div role="main" class="ui-content">
+            <div id="message"></div>
+            <div id="results"></div>
+            <!-- Nav Panel -->
+            <div data-role="panel" id="nav-panel-location" data-display="overlay" data-position="left">
+                <ul data-role="listview">
+                <li><a href="#location" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
-</div>
-<!-- Species -->
-<div data-role="page" id="species" data-title="mebd | species">
-    <div data-role="header" data-id="site-header" data-add-back-btn="true">
-        <h1><a href="index.mobile.html">home</a></h1>
+    <!-- Species Results -->
+    <div data-role="page" id="species" data-title="mebd | species">
+        <div data-role="header" data-id="site-header">
+            <a href="#nav-panel-species" data-icon="bars" data-iconpos="notext">Menu</a>
+            <h1><a href="index.mobile.html">home</a></h1>
+        </div>
+        <div role="main" class="ui-content">
+            <div id="message"></div>
+            <div id="results"></div>
+            <!-- Nav Panel -->
+            <div data-role="panel" id="nav-panel-species" data-display="overlay" data-position="left">
+                <ul data-role="listview">
+                <li><a href="#species" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
-    <div role="main" class="ui-content">
-        <div id="message"></div>
-        <div id="results"></div>
-    </div>
-</div>
 </body>
 </html>
