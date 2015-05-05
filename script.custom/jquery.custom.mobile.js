@@ -152,7 +152,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getChecklistsTable: function(data, selection) {
-		var table = $.buildTableHeaders("checklistsTable", "tablesorter", "Location / Hotspot", "Recent Species", "Date", "");
+		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Location / Hotspot", "Recent Species", "Date", "");
 		var tbody = document.createElement('tbody');		
 		
 		var speciesCount = 0;
@@ -191,7 +191,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getNotablesTable: function(data, selection) {
-		var table = $.buildTableHeaders("notablesTable", "tablesorter", "Species Name", "Location", "Count", "Date / Checklist");
+		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species Name", "Location", "Count", "Date / Checklist");
 		var tbody = document.createElement('tbody');
 		tbody.setAttribute("class", "notablesBody");
         
@@ -217,7 +217,7 @@ jQuery.extend({
 });
 
 jQuery.extend({
-	getLocationTable: function(data, selection) {
+	getLocationTable: function(data) {
 		var table = $.buildTableHeaders("locationTable", "tablesorter", "Species Name", "Count", "Date / Checklist", "");
 		var tbody = document.createElement('tbody');
 

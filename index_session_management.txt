@@ -1,0 +1,72 @@
+            // Extract session management here for eBird results data.
+            /*$(target).click(function() {
+                $("#results").html("");
+                var selection = $("#tags").val();
+
+                //sessionStorage.removeItem("results");
+                
+                if (selection.length > 0) {
+                    var api = (document.title.indexOf("checklists") > -1) ? "checklists" : "notables";
+                    document.title = "meBird | " + api;
+                    var data = "";
+                    
+                    // If region has changed, call eBird for fresh data.
+                    var calleBird = false;
+                    if (sessionStorage.getItem("region") == null) {
+                        sessionStorage.setItem("region", selection);
+                    } else {
+                        var prevRegion = sessionStorage.getItem("region");
+                        if (prevRegion != selection) {
+                            calleBird = true;
+                            sessionStorage.setItem("region", selection);
+                        }
+                    }
+                    
+                    // Call eBird or use cached data.
+                    if (sessionStorage.getItem("results") == null || calleBird) {
+                        var url = $.geteBirdApiUrl(selection, api);
+                        data = $.getValues(url, "json");
+                        
+                        var storedData = JSON.stringify(data);
+                        sessionStorage.setItem("results", storedData);
+                        
+                        //$("#testData").html("...ebird data...");
+                    } else {
+                        var storedData = sessionStorage.getItem("results");
+                        if (storedData != null) {
+                            data = JSON.parse(storedData);
+                        }
+                        //$("#testData").html("...stored data...");
+                    }
+                    
+                    if (data.length > 0) {
+                        if (api == "notables") {
+                            var tbody = $.getNotablesTable(data, selection);
+
+                            $("#notablesBody").replaceWith(tbody);
+                            $("#notablesMessage").html("<p>Notable species for " + selection + ", in last 5 days: " + data.length + ".</p>");
+                            $("#notablesTable").tablesorter();
+                        } else {
+                        }
+                    
+                        var table = (api == "checklists") ? $.getChecklistsTable(data, selection) : $.getNotablesTable(data, selection);
+                        
+                        $("#results").html(table);
+
+                        if (api == "checklists") {
+                            $("#message").html("<p>Checklists with number of species seen most recently in " + selection + ", in last 5 days: " + (table.rows.length-1) + ".</p>");
+                            $("#checklists").tablesorter();
+                        } else {
+                            $("#message").html("<p>Notable species for " + selection + ", in last 5 days: " + data.length + ".</p>");
+                            $("#notables").tablesorter();
+                        }
+                    } else {
+                        $("#results").html("");
+                        $("#message").html(noDataFound);
+                    }
+                } else {
+                    $("#results").html("");
+                    $("#message").html("<p>Enter State or County, select, then click 'Go'</p>");
+                }
+            });*/
+
