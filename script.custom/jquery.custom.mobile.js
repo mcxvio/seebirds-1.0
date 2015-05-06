@@ -109,19 +109,22 @@ jQuery.extend({
 
 // START: Get Tables.
 jQuery.extend({
-	buildTableHeaders: function(idName, className, heading1, heading2, heading3, heading4) {
+	buildTableHeaders: function(idName, className, heading1, heading2, heading3, heading4, heading5) {
 		var table = document.createElement("table");
+        //data-role="table" id="table-column-toggle" data-mode="columntoggle" class="ui-responsive table-stroke"
+        //<table data-role="table" id="phone-table" data-mode="columntoggle" data-column-btn-text="Compare..." data-column-btn-theme="a" class="phone-compare ui-shadow table-stroke">
 		
-		table.setAttribute("id", idName);
+        table.setAttribute("id", idName);
 		table.setAttribute("class", className);
-
+        table.setAttribute("data-role", "table");
+        table.setAttribute("data-mode", "columntoggle");
+        
 		var thead = document.createElement('thead');
 		var tr = document.createElement('tr');
 		var th1 = document.createElement('th');
 		var th2 = document.createElement('th');
 		var th3 = document.createElement('th');
-		var th4 = document.createElement('th');
-		
+
 		th1.innerHTML = heading1;
 		tr.appendChild(th1);
 		th2.innerHTML = heading2;
@@ -130,10 +133,18 @@ jQuery.extend({
 		tr.appendChild(th3);
 		
 		if (heading4 != "") {
+            var th4 = document.createElement('th');
+            th4.setAttribute("data-priority", "2");
 			th4.innerHTML = heading4;
 			tr.appendChild(th4);
 		}
-		
+        if (heading5 != "") {
+            var th5 = document.createElement('th');
+            th5.setAttribute("data-priority", "3");
+            th5.innerHTML = heading5;
+            tr.appendChild(th5);
+        }
+       
 		thead.appendChild(tr);
 		table.appendChild(thead);
 		
@@ -152,7 +163,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getChecklistsTable: function(data, selection) {
-		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Location / Hotspot", "Recent Species", "Date", "");
+		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Location / Hotspot", "Recent Species", "Date", "", "");
 		var tbody = document.createElement('tbody');		
 		
 		var speciesCount = 0;
@@ -191,7 +202,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getNotablesTable: function(data, selection) {
-		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species Name", "Location", "Count", "Date / Checklist");
+		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species Name", "Location", "Count", "Date / Checklist", "Observer");
 		var tbody = document.createElement('tbody');
 		tbody.setAttribute("class", "notablesBody");
         
@@ -202,11 +213,13 @@ jQuery.extend({
 			var obsDt = '<a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a>';
 			var howMany = data[i].howMany || 'X'; //ternary operator.
 			var locName = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
+            var userName = data[i].userDisplayName;
 			
 			row = $.buildTableCell(species, row);
 			row = $.buildTableCell(locName, row);
 			row = $.buildTableCell(howMany, row);
 			row = $.buildTableCell(obsDt, row);
+            row = $.buildTableCell(userName, row);
 			
 			tbody.appendChild(row);
 		}
@@ -218,7 +231,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getLocationTable: function(data) {
-		var table = $.buildTableHeaders("locationTable", "tablesorter", "Species Name", "Count", "Date / Checklist", "");
+		var table = $.buildTableHeaders("locationTable", "tablesorter", "Species Name", "Count", "Date / Checklist", "", "");
 		var tbody = document.createElement('tbody');
 
 		for (var i = 0; i < data.length; i++) {
@@ -242,7 +255,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getSpeciesTable: function(data, regName) {
-		var table = $.buildTableHeaders("speciesTable", "tablesorter", "Location / Hotspot", "Count", "Date", "");
+		var table = $.buildTableHeaders("speciesTable", "tablesorter", "Location / Hotspot", "Count", "Date", "", "");
 		var tbody = document.createElement('tbody');
 
 		for (var i = 0; i < data.length; i++) {

@@ -9,15 +9,16 @@
             margin: 0 auto;
             text-align: center;
         }
+        .copyright {
+            font-size: 0.75em;
+        }
         a[href^="http://"]:after, a[href^="https://"]:after {
           content: url(http://upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png);
           margin: 0 0 0 5px;
         }
     </style>
     <link rel="stylesheet" type="text/css" href="script.tablesorter/styles.tablesorter.css">
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="script.tablesorter/jquery.tablesorter.min.js"></script>
     <script src="script.custom/jquery.custom.mobile.js"></script>
     <!-- jQM -->
@@ -25,8 +26,8 @@
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <!-- end jQM -->
     <script>
-        var urlBase = "http://huntsebirds.appspot.com/";
-        //var urlBase = "http://localhost:8080/mebird/";
+        //var urlBase = "http://huntsebirds.appspot.com/";
+        var urlBase = "http://localhost:8080/mebird/";
         var dataFile = "ebird_api_ref_list_test.xml";
         var noDataFound = "<p>No species sightings found.</p>";
 
@@ -52,17 +53,10 @@
                 });
             });
             
-            var selectedData = {
-                region: "",
-                locId: "",
-                locName: "",
-                sciName: "",
-                comName: ""
-            }
+            var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "" }
 
             // Load autocomplete values & handle selection.
             $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
-                console.log("pagecreate entry");
                 var page = $(this).attr("id");
                 if (page == "checklists" || page == "notables") {
                     var xml = $.getValues(urlBase + dataFile, "xml");
@@ -106,9 +100,6 @@
                 var toPage = ui.toPage[0].id;
                 var prevPage = ui.prevPage.attr('id');
                 
-                console.log("pagecontainerbeforeshow, toPage  :" + toPage);
-                console.log("pagecontainerbeforeshow, prevPage:" + prevPage);
-                
                 if (toPage == "sightings") {
                     var region = selectedData.region;
                     
@@ -116,11 +107,23 @@
                         var table = "";
                         var message = "";
                         var tableName = "";
+                        var data = "";
+                        $("#sightings #message").html("");
+                        $("#sightings #results").html("");
                     
                         if (prevPage == "notables") {
-                            var url = $.geteBirdApiUrl(region, "notables");
-                            data = $.getValues(url, "json");
-                            
+                            var storedData = sessionStorage.getItem("notablesResults");
+                            var storedRegion = sessionStorage.getItem("notablesRegion");
+                            if ((storedData != null && storedRegion != null) && storedRegion == selectedData.region) {
+                                data = JSON.parse(storedData);
+                            } else {
+                                var url = $.geteBirdApiUrl(region, "notables");
+                                data = $.getValues(url, "json");
+
+                                var storedData = JSON.stringify(data);
+                                sessionStorage.setItem("notablesResults", storedData);
+                                sessionStorage.setItem("notablesRegion", selectedData.region);
+                            }
                             if (data.length > 0) {
                                 table = $.getNotablesTable(data, region);
                                 message = "<p>Notable species for " + region + ", in last 5 days: " + data.length + ".</p>";
@@ -129,9 +132,18 @@
                             }
                         }
                         if (prevPage == "checklists") {
-                            var url = $.geteBirdApiUrl(region, "checklists");
-                            data = $.getValues(url, "json");
-                            
+                            var storedData = sessionStorage.getItem("checklistsResults");
+                            var storedRegion = sessionStorage.getItem("checklistsRegion");
+                            if ((storedData != null && storedRegion != null) && storedRegion == selectedData.region) {
+                                data = JSON.parse(storedData);
+                            } else {
+                                var url = $.geteBirdApiUrl(region, "checklists");
+                                data = $.getValues(url, "json");
+
+                                var storedData = JSON.stringify(data);
+                                sessionStorage.setItem("checklistsResults", storedData);
+                                sessionStorage.setItem("checklistsRegion", selectedData.region);
+                            }
                             if (data.length > 0) {
                                 table = $.getChecklistsTable(data, region);
                                 message = "<p>Checklists with number of species seen most recently in " + region + ", in last 5 days: " + (table.rows.length-1) + ".</p>";
@@ -143,9 +155,10 @@
                             $("#sightings #message").html(message);
                             $("#sightings #results").html(table);
                             $("#sightingsTable").tablesorter();
+                            $("#sightingsTable").table();
                         }
                     } else {
-                        $("#sightings #message").html("<p>Enter State or County, select, then click 'Go'</p>");
+                        $("#sightings #message").html("<p><a href='#nav-panel-sightings'>Select</a> from Checklists or Notables to search State or County sightings.</p>");
                     }
                 }
                 if (toPage == "location") {
@@ -153,9 +166,9 @@
                     var locName = selectedData.locName;
                     var region = selectedData.region;
                     
-                    console.log("gotoLocation, locId: " + locId);
+                    /*console.log("gotoLocation, locId: " + locId);
                     console.log("gotoLocation, locName: " + locName);
-                    console.log("gotoLocation, region : " + region);
+                    console.log("gotoLocation, region : " + region);*/
                     
                     var url = $.geteBirdApiUrl(locId, "location");
                     var data = $.getValues(url, "json");
@@ -166,6 +179,7 @@
                         $("#location #results").html(table);
                         $("#location #message").html('<p>Sightings at <a href="http://ebird.org/ebird/hotspot/' + locId + '" target="_blank">' + locName + '</a> in last 14 days: ' + data.length + ".</p>");
                         $("#locationTable").tablesorter();
+                        $("#locationTable").table();
                     } else {
                         $("#location #results").html("");
                         $("#location #message").html(noDataFound);
@@ -176,9 +190,9 @@
                     var comName = selectedData.comName;
                     var region = selectedData.region;
 
-                    console.log("toPage species, sciName: " + sciName);
+                    /*console.log("toPage species, sciName: " + sciName);
                     console.log("toPage species, comName: _" + comName + "_");
-                    console.log("toPage species, region : " + region);
+                    console.log("toPage species, region : " + region);*/
                     
                     var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
                     var data = $.getValues(url, "json");
@@ -189,6 +203,7 @@
                         $("#species #results").html(table);
                         $("#species #message").html("<p>Sightings of <strong>" + comName + "</strong> in " + region + " in last 14 days: " + data.length + ".</p>");
                         $("#speciesTable").tablesorter();
+                        $("#speciesTable").table();
                     } else {
                         $("#species #results").html("");
                         $("#species #message").html(noDataFound);
@@ -226,8 +241,8 @@
             <li><a id="gotoNotables" href="#notables">notables</a></li></ul>
         </div>
         <div data-role="footer" data-position="fixed" class="centerbox">
-            <a href="#copyright" data-rel="popup" data-transition="pop">copyright</a><a href="#donate">donate</a><a href="#providers">providers</a>
-            <div data-role="popup" id="copyright"><p>All data courtesy of <a href="http://www.ebird.org" target="_blank">eBird</a></p><p>Copyright M. Hunt, 2015. All rights reserved.</p></div>
+            <!--<a href="#copyright" data-rel="popup" data-transition="pop">copyright</a><a href="#donate">donate</a><a href="#providers">providers</a>--><!--<div data-role="popup" id="copyright">-->
+            <p class="copyright">Copyright M. Hunt, 2015. All rights reserved. All data courtesy of <a href="http://www.ebird.org" target="_blank">eBird</a></p>
         </div>
     </div>
     <!-- Checklists Search -->
@@ -249,6 +264,9 @@
                 </ul>
             </div>
         </div>
+        <div data-role="footer" data-position="fixed" class="centerbox">
+            <p class="copyright">Copyright M. Hunt, 2015. All rights reserved. All data courtesy of <a href="http://www.ebird.org" target="_blank">eBird</a></p>
+        </div>
     </div>
     <!-- Notables Search -->
     <div data-role="page" id="notables" data-title="mebd | notables">
@@ -269,6 +287,9 @@
                 </ul>
             </div>
         </div>
+        <div data-role="footer" data-position="fixed" class="centerbox">
+            <p class="copyright">Copyright M. Hunt, 2015. All rights reserved. All data courtesy of <a href="http://www.ebird.org" target="_blank">eBird</a></p>
+        </div>
     </div>
     <!-- Sightings Results -->
     <div data-role="page" id="sightings" data-title="mebd | sightings">
@@ -287,6 +308,9 @@
                 <li><a href="#notables" id="gotoNotables">notables</a></li>
                 </ul>
             </div>
+        </div>
+        <div data-role="footer" data-position="fixed" class="centerbox">
+            <p class="copyright">Copyright M. Hunt, 2015. All rights reserved. All data courtesy of <a href="http://www.ebird.org" target="_blank">eBird</a></p>
         </div>
     </div>
     <!-- Location Results -->
@@ -307,6 +331,9 @@
                 </ul>
             </div>
         </div>
+        <div data-role="footer" data-position="fixed" class="centerbox">
+            <p class="copyright">Copyright M. Hunt, 2015. All rights reserved. All data courtesy of <a href="http://www.ebird.org" target="_blank">eBird</a></p>
+        </div>
     </div>
     <!-- Species Results -->
     <div data-role="page" id="species" data-title="mebd | species">
@@ -325,6 +352,9 @@
                 <li><a href="#notables" id="gotoNotables">notables</a></li>
                 </ul>
             </div>
+        </div>
+        <div data-role="footer" data-position="fixed" class="centerbox">
+            <p class="copyright">Copyright M. Hunt, 2015. All rights reserved. All data courtesy of <a href="http://www.ebird.org" target="_blank">eBird</a></p>
         </div>
     </div>
 </body>
