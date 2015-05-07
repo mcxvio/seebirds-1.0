@@ -4,19 +4,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>meBird</title>
-    <style type="text/css">
-        .centerbox {
-            margin: 0 auto;
-            text-align: center;
-        }
-        .copyright {
-            font-size: 0.75em;
-        }
-        a[href^="http://"]:after, a[href^="https://"]:after {
-          content: url(http://upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png);
-          margin: 0 0 0 5px;
-        }
-    </style>
     <link rel="stylesheet" type="text/css" href="script.tablesorter/styles.tablesorter.css">
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="script.tablesorter/jquery.tablesorter.min.js"></script>
@@ -25,9 +12,30 @@
     <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <!-- end jQM -->
+    <style type="text/css">
+        .centerbox {
+            margin: 0 auto;
+            text-align: center;
+        }
+        .copyright {
+            font-size: 0.75em;
+        }
+        /* absolutely position the footer to the bottom of the page */
+        .ui-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+        }​
+        a[href^="http://"]:after, a[href^="https://"]:after {
+            content: url(http://upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png);
+            margin: 0 0 0 5px;
+        }
+    </style>
     <script>
-        //var urlBase = "http://huntsebirds.appspot.com/";
-        var urlBase = "http://localhost:8080/mebird/";
+        var urlBase = "http://huntsebirds.appspot.com/";
+        //var urlBase = "http://localhost:8080/mebird/";
         var dataFile = "ebird_api_ref_list_test.xml";
         var noDataFound = "<p>No species sightings found.</p>";
 
@@ -236,11 +244,11 @@
         <div data-role="header" data-id="site-header" data-position="inline">
             <h1><a href="index.mobile.html">home</a></h1>
         </div>
-        <div role="main" class="iu-content">
+        <div role="main" class="iu-content" style="height: 100%">
             <ul data-role="listview"><li><a id="gotoChecklists" href="#checklists">checklists</a></li>
             <li><a id="gotoNotables" href="#notables">notables</a></li></ul>
         </div>
-        <div data-role="footer" data-position="fixed" class="centerbox">
+        <div data-role="footer" class="centerbox">
             <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
         </div>
     </div>
@@ -263,7 +271,7 @@
                 </ul>
             </div>
         </div>
-        <div data-role="footer" data-position="fixed" class="centerbox">
+        <div data-role="footer" class="centerbox">
             <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
         </div>
     </div>
@@ -286,7 +294,7 @@
                 </ul>
             </div>
         </div>
-        <div data-role="footer" data-position="fixed" class="centerbox">
+        <div data-role="footer" class="centerbox">
             <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
         </div>
     </div>
@@ -299,6 +307,7 @@
         <div role="main" class="ui-content">
             <div id="message"></div>
             <div id="results"></div>
+            <br />
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-sightings" data-display="overlay" data-position="left">
                 <ul data-role="listview">
@@ -308,7 +317,7 @@
                 </ul>
             </div>
         </div>
-        <div data-role="footer" data-position="fixed" class="centerbox">
+        <div data-role="footer" class="centerbox">
             <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
         </div>
     </div>
@@ -321,6 +330,7 @@
         <div role="main" class="ui-content">
             <div id="message"></div>
             <div id="results"></div>
+            <br />
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-location" data-display="overlay" data-position="left">
                 <ul data-role="listview">
@@ -330,7 +340,7 @@
                 </ul>
             </div>
         </div>
-        <div data-role="footer" data-position="fixed" class="centerbox">
+        <div data-role="footer" class="centerbox">
             <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
         </div>
     </div>
@@ -343,6 +353,7 @@
         <div role="main" class="ui-content">
             <div id="message"></div>
             <div id="results"></div>
+            <br />
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-species" data-display="overlay" data-position="left">
                 <ul data-role="listview">
@@ -352,7 +363,7 @@
                 </ul>
             </div>
         </div>
-        <div data-role="footer" data-position="fixed" class="centerbox">
+        <div data-role="footer" class="centerbox">
             <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
         </div>
     </div>
