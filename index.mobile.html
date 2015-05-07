@@ -13,6 +13,10 @@
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <!-- end jQM -->
     <style type="text/css">
+        a[href^="http://"]:after, a[href^="https://"]:after {
+            content: url(http://upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png);
+            margin: 0 0 0 5px;
+        }
         .centerbox {
             margin: 0 auto;
             text-align: center;
@@ -20,7 +24,6 @@
         .copyright {
             font-size: 0.75em;
         }
-        /* absolutely position the footer to the bottom of the page */
         .ui-footer {
             position: absolute;
             bottom: 0;
@@ -28,14 +31,10 @@
             width: 100%;
             height: 40px;
         }​
-        a[href^="http://"]:after, a[href^="https://"]:after {
-            content: url(http://upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png);
-            margin: 0 0 0 5px;
-        }
     </style>
     <script>
-        var urlBase = "http://huntsebirds.appspot.com/";
-        //var urlBase = "http://localhost:8080/mebird/";
+        //var urlBase = "http://huntsebirds.appspot.com/";
+        var urlBase = "http://localhost:8080/mebird/";
         var dataFile = "ebird_api_ref_list_test.xml";
         var noDataFound = "<p>No species sightings found.</p>";
 

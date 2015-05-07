@@ -202,7 +202,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getNotablesTable: function(data, selection) {
-		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species Name", "Location", "Count", "Date / Checklist", "Observer");
+		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species Name", "Location", "Date / Checklist", "Count", "Observer");
 		var tbody = document.createElement('tbody');
         
 		for (var i = 0; i < data.length; i++) {
