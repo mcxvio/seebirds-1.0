@@ -204,7 +204,6 @@ jQuery.extend({
 	getNotablesTable: function(data, selection) {
 		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species Name", "Location", "Count", "Date / Checklist", "Observer");
 		var tbody = document.createElement('tbody');
-		tbody.setAttribute("class", "notablesBody");
         
 		for (var i = 0; i < data.length; i++) {
 			var row = document.createElement('tr');
@@ -217,8 +216,8 @@ jQuery.extend({
 			
 			row = $.buildTableCell(species, row);
 			row = $.buildTableCell(locName, row);
-			row = $.buildTableCell(howMany, row);
 			row = $.buildTableCell(obsDt, row);
+			row = $.buildTableCell(howMany, row);
             row = $.buildTableCell(userName, row);
 			
 			tbody.appendChild(row);
