@@ -1,225 +1,339 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>meBird</title>
-	<style type="text/css">
-		body {
-			font: 12px/20px Verdana, Arial, sans-serif;
-		}
-		select, option {
-			font: 12px/20px Verdana, Arial, sans-serif;
-			width: 300px;
-		}
-		input {
-			width: 300px;		
-		}
-		#loading {
-			vertical-align: bottom;
-		}
-		.center {
-			margin-left: auto;
-			margin-right: auto;
-			width: 50%;
-			text-align: center;
-		}
-		.centerbox {
-			margin: 0 auto;
-			text-align: center;
-		}
-		a[href^="http://"]:after, a[href^="https://"]:after {
-		  content: url(http://upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png);
-		  margin: 0 0 0 5px;
-		}
-	</style>
-	<link rel="stylesheet" type="text/css" href="script.tablesorter/styles.tablesorter.css">
-	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-	<script src="script.tablesorter/jquery.tablesorter.min.js"></script>
-	<script src="script.custom/jquery.custom.js"></script>
-	<script>
-		var urlBase = "http://huntsebirds.appspot.com/";
-		//var urlBase = "http://localhost:8080/mebird/";
-		var dataFile = "ebird_api_ref_list_test.xml";
-		var noDataFound = "<p>No species sightings found.</p>";
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hunt's eBirds</title>
+    <link rel="stylesheet" type="text/css" href="script.tablesorter/styles.tablesorter.css">
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="script.tablesorter/jquery.tablesorter.min.js"></script>
+    <script src="script.custom/jquery.custom.mobile.js"></script>
+    <!-- jQM -->
+    <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <!-- end jQM -->
+    <style type="text/css">
+        a[href^="http://"]:after, a[href^="https://"]:after {
+            content: url(http://upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png);
+            margin: 0 0 0 5px;
+        }
+        .centerbox {
+            margin: 0 auto;
+            text-align: center;
+        }
+        .copyright {
+            font-size: 0.75em;
+        }
+        .ui-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+        }​
+    </style>
+    <script>
+        var urlBase = "http://huntsebirds.appspot.com/";
+        //var urlBase = "http://localhost:8080/mebird/";
+        var dataFile = "ebird_api_ref_list_test.xml";
+        var noDataFound = "<p>No species sightings found.</p>";
 
-		$(document).ready(function () {
+        (function( $ ) {
+            $(function() { // On document ready
+                $(document).on("ajaxSend", function() {
+                    var $this = $( this ),
+                        theme = $this.jqmData( "theme" ) || $.mobile.loader.prototype.options.theme,
+                        msgText = $this.jqmData( "msgtext" ) || $.mobile.loader.prototype.options.text,
+                        textVisible = $this.jqmData( "textvisible" ) || $.mobile.loader.prototype.options.textVisible,
+                        textonly = !!$this.jqmData( "textonly" );
+                        html = $this.jqmData( "html" ) || "";
+                    $.mobile.loading( "show", {
+                            text: "loading",
+                            textVisible: true,
+                            theme: theme,
+                            textonly: textonly,
+                            html: html
+                    });
+                })
+                .on("ajaxStop", function() {
+                    $.mobile.loading( "hide" );
+                });
+            });
+            
+            var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" }
 
-			$("#loading").bind("ajaxSend", function() {
-				$(this).show();
-			}).bind("ajaxStop", function() {
-				$(this).hide();
-			}).bind("ajaxError", function() {
-				$(this).hide();
-			});		
-			
-			$(gotoHome).on("click", function () {
-				document.title = "meBird";
-			
-				$(homePage).show();
-				$(navigation).hide();
-				$(search).hide();
-				
-				$("#results").html("");
-				$("#message").html("");
-			});
+            // Load autocomplete values & handle selection.
+            $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
+                var page = $(this).attr("id");
+                if (page == "checklists" || page == "notables") {
+                    var xml = $.getValues(urlBase + dataFile, "xml");
+                    var filteredList = $(xml).filterNode("region");
+                    
+                    var tags = (page == "checklists") ? "#autocomplete-items-checklists" : "#autocomplete-items-notables";
+                    
+                    $(tags).on("filterablebeforefilter", function ( e, data ) {
+                        var $ul = $( this ),
+                            $input = $( data.input ),
+                            value = $input.val(),
+                            html = "";
+                        $ul.html( "" );
+                
+                        if (value && value.length > 1) {
+                            $ul.html( "<li><div class='ui-loader'><span class='ui-icon ui-icon-loading'></span></div></li>" );
+                            $ul.listview( "refresh" );
+                
+                            var val;
+                            $(filteredList).each(function () {
+                                val = $(this).filterNode("name").text() + " (" + ($(this).filterNode("subnational2-code").text() || $(this).filterNode("subnational1-code").text()) + ")"
+                                html += "<li><a href='#sightings' class='gotoRegion'>" + val + "</a></li>";
+                            });
+                            
+                            $ul.html( html );
+                            $ul.listview("refresh");
+                            $ul.trigger("updatelayout");
+                        }
+                    });
+                }
+            });
 
-			$(gotoChecklists).on("click", function () {
-				document.title = "meBird | checklists";
-				
-				$(homePage).hide();
-				$(navigation).show();
-				$(search).show();
-				$(tags).focus();				
-				
-				$(function() {
-					var tags = $.getAutocompleteNameTags(urlBase + dataFile);
-					$("#tags").autocomplete({
-						source: tags
-					});
-				});
-			});
-			
-			$(gotoNotables).on("click", function () {
-				document.title = "meBird | notables";
+            // Save selected region from autocomplete.
+            $(document).on("click", "a.gotoRegion", function() {
+                selectedData.region = $(this).text();
+            });
+            
+            $(document).pagecontainer({ beforeshow: function(event, ui) { } });
+            // Load results data.
+            $(document).on("pagecontainerbeforeshow", function(event, ui){
+                var toPage = ui.toPage[0].id;
+                var prevPage = ui.prevPage.attr('id');
+                var table = "";
+                var message = "";
+                var tableName = "";
+                var data = "";
+                var page = "";
+                
+                if (toPage == "sightings") {
+                    page = "#sightings";
+                    var region = selectedData.region;
+                    
+                    if (region.length > 0) {
+                        $("#sightings #message").html("");
+                        $("#sightings #results").html("");
+                    
+                        if (prevPage == "notables" ||
+                            (selectedData.startPage == "notables" && prevPage == "location"|| prevPage == "species")) {
 
-				$(homePage).hide();
-				$(navigation).show();
-				$(search).show();
-				$(tags).focus();
-				
-				$(function() {
-					var tags = $.getAutocompleteNameTags(urlBase + dataFile);
-					$("#tags").autocomplete({
-						source: tags
-					});
-				});
-			});
+                            selectedData.startPage = "notables";
+                            console.log('getData: ' + prevPage + ", " + selectedData.startPage);
+                            data = $.getData("notablesResults", "notablesRegion", region, "notables");
+                            
+                            if (data.length > 0) {
+                                table = $.getNotablesTable(data, region);
+                                message = "<p>Notable species for " + region + ", in last 5 days: " + data.length + ".</p>";
+                            }
+                        }
+                        if (prevPage == "checklists"  ||
+                            (selectedData.startPage == "checklists" && prevPage == "location"|| prevPage == "species")) {
 
-			$(target).click(function() {
-				$("#results").html("");
-				var selection = $("#tags").val();
+                            selectedData.startPage = "checklists";
+                            console.log('get checklists: ' + prevPage + ", " + selectedData.startPage);
+                            data = $.getData("checklistsResults", "checklistsRegion", region, "checklists");
 
-				if (selection.length > 0)
-				{
-					var api = (document.title.indexOf("checklists") > -1) ? "checklists" : "notables";
-					document.title = "meBird | " + api;
-					var data = "";
-					
-					// If region has changed, call eBird for fresh data.
-					var calleBird = false;
-					if (sessionStorage.getItem("region") == null) {
-						sessionStorage.setItem("region", selection);
-					} else {
-						var prevRegion = sessionStorage.getItem("region");
-						if (prevRegion != selection) {
-							calleBird = true;
-							sessionStorage.setItem("region", selection);
-						}
-					}
-					
-					// Call eBird or use cached data.
-					if (sessionStorage.getItem("results") == null || calleBird) {
-						var url = $.geteBirdApiUrl(selection, api);
-						data = $.getValues(url, "json");
-						
-						var storedData = JSON.stringify(data);
-						sessionStorage.setItem("results", storedData);
-						
-						//$("#testData").html("...ebird data...");
-					} else {
-						var storedData = sessionStorage.getItem("results");
-						if (storedData != null) {
-							data = JSON.parse(storedData);
-						}
-						//$("#testData").html("...stored data...");
-					}
-					
-					if (data.length > 0) {
-						var table = (api == "checklists") ? $.getChecklistsTable(data, selection) : $.getNotablesTable(data, selection);
-						$("#results").html(table);
-						
-						if (api == "checklists") {
-							$("#message").html("<p>Checklists with number of species seen most recently in " + selection + ", in last 5 days: " + (table.rows.length-1) + ".</p>");
-							$("#checklists").tablesorter();
-						} else {
-							$("#message").html("<p>Notable species for " + selection + ", in last 5 days: " + data.length + ".</p>");
-							$("#notables").tablesorter();
-						}
-					} else {
-						$("#results").html("");
-						$("#message").html(noDataFound);
-					}
-				} else {
-					$("#results").html("");
-					$("#message").html("<p>Enter State or County, select, then click 'Go'</p>");
-				}
-			});				
-			
-			$(document).on("click", "a.gotoSpecies", function() {
-				var sciName = $.getSubRegionFromSelection($(this).attr('title'));
-				var region = sessionStorage.getItem("region");
+                            if (data.length > 0) {
+                                table = $.getChecklistsTable(data, region);
+                                message = "<p>Checklists with number of species seen most recently in " + region + ", in last 5 days: " + (table.rows.length-1) + ".</p>";
+                            }
+                        }
+                    } else {
+                        $("#sightings #message").html("<p><a href='#nav-panel-sightings'>Select</a> from Checklists or Notables to search State or County sightings.</p>");
+                    }
+                }
+                if (toPage == "location") {
+                    page = "#location";
+                    var locId = selectedData.locId;
+                    var locName = selectedData.locName;
+                    var region = selectedData.region;
+                    
+                    var url = $.geteBirdApiUrl(locId, "location");
+                    var data = $.getValues(url, "json");
+                    
+                    if (data.length > 0) {
+                        table = $.getLocationTable(data);
+                        message = '<p>Sightings at <a href="http://ebird.org/ebird/hotspot/' + locId + '" target="_blank">' + locName + '</a> in last 14 days: ' + data.length + '.</p>';
+                    }
+                }
+                if (toPage == "species") {
+                    page = "#species";
+                    var sciName = selectedData.sciName;
+                    var comName = selectedData.comName;
+                    var region = selectedData.region;
 
-				document.title = "meBird | species";
-				$("#results").html("");
-				
-				var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
-				var data = $.getValues(url, "json");
+                    var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
+                    var data = $.getValues(url, "json");
+                    
+                    if (data.length > 0) {
+                        table = $.getSpeciesTable(data, region);
+                        message = "<p>Sightings of <strong>" + comName + "</strong> in " + region + " in last 14 days: " + data.length + ".</p>";
+                    }
+                }
+                
+                if (table != "" && table.rows.length > 1) {
+                    $(page + " #message").html(message);
+                    $(page + " #results").html(table);
+                    $(page + "Table").tablesorter();
+                    $(page + "Table").table();
+                }
+            });
 
-				if (data.length > 0) {
-					var table = $.getSpeciesTable(data, region);
-
-					$("#results").html(table);
-					$("#message").html("<p>Sightings of " + $(this).text() + " in " + region + ", in last 14 days: " + data.length + ".</p>");
-					$("#species").tablesorter();
-				} else {
-					$("#results").html("");
-					$("#message").html(noDataFound);
-				}
-			});
-			
-			$(document).on("click", "a.gotoLocation", function() {
-				var location = $(this).attr('title');
-				var region = sessionStorage.getItem("region");
-
-				document.title = "meBird | location";
-				$("#results").html("");
-				
-				var url = $.geteBirdApiUrl(location, "location");
-				var data = $.getValues(url, "json");
-				
-				if (data.length > 0) {
-					var table = $.getLocationTable(data, location);
-					
-					$("#results").html(table.outerHTML);
-					$("#message").html('<p>Sightings at <a href="http://ebird.org/ebird/hotspot/' + location + '" target="_blank">' + $(this).text() + '</a>, in last 14 days: ' + data.length + ".</p>");
-					$("#location").tablesorter();
-				} else {
-					$("#results").html("");
-					$("#message").html(noDataFound);
-				}
-			});
-		});
-	</script>
+            // Load location data.
+            $(document).on("click", "a.gotoLocation", function() {
+                var locId = $(this).attr('title');
+                var locName = $(this).text();
+                selectedData.locId = locId;
+                selectedData.locName = locName;
+            });
+        
+            // Load species data.
+            $(document).on("click", "a.gotoSpecies", function() {
+                var title = $(this).attr('title');
+                var sciName = $.getSubRegionFromSelection(title);
+                var comName = title.substring(0, title.indexOf('(')-1);
+                selectedData.sciName = sciName;
+                selectedData.comName = comName;
+            });
+        })( jQuery );
+    </script>
 </head>
 <body>
-	<div id="homePage" class="center">
-		meBird 1.1<br/>
-		<a id="gotoChecklists" href="#">checklists</a> | <a id="gotoNotables" href="#">notables</a>
-	</div>
-	<div id="navigation" class="center" style="display:none">
-		meBird 1.1<br/>
-		<a id="gotoHome" href="#">home</a>
-	</div>
-	<div id="search" class="centerbox" style="display:none">
-		<input id="tags" type="text" autofocus="autofocus" placeholder="Enter State or County, select, then click 'Go'">
-		<br/><button id="target" type="button">Go</button>
-		<img id="loading" style="display:none;" src="spiffygif_22x22.gif">
-	</div>
-	<!--<div id="testData"></div>-->
-	<div id="message"></div>
-	<div id="results"></div>
+    <!-- Home -->
+    <div data-role="page" id="home" data-title="home">
+        <div data-role="header" data-id="site-header" data-position="inline">
+            <h1><a href="index.mobile.html">home</a></h1>
+        </div>
+        <div role="main" class="iu-content" style="height: 100%">
+            <ul data-role="listview"><li><a id="gotoChecklists" href="#checklists">checklists</a></li>
+            <li><a id="gotoNotables" href="#notables">notables</a></li></ul>
+        </div>
+        <div data-role="footer" class="centerbox">
+            <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
+        </div>
+    </div>
+    <!-- Checklists Search -->
+    <div data-role="page" id="checklists" data-title="hunt's ebirds | checklists">
+        <div data-role="header" data-id="site-header">
+            <a href="#nav-panel-checklists" data-icon="bars" data-iconpos="notext">Menu</a>
+            <h1><a href="index.mobile.html">home</a></h1>
+        </div>
+        <div role="main" class="ui-content">
+            <!-- Autocomplete -->
+            <form class="ui-filterable"><input id="autocomplete-input-checklists" data-type="search" placeholder="Search for State or County" autofocus="autofocus"></form>
+            <ul id="autocomplete-items-checklists" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input-checklists"></ul>
+            <!-- Nav Panel -->
+            <div data-role="panel" id="nav-panel-checklists" data-display="overlay" data-position="left">
+                <ul data-role="listview">
+                <li><a href="#checklists" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                <li><a href="#checklists" id="gotoChecklists" class="ui-btn ui-btn-active">checklists</a></li>
+                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                </ul>
+            </div>
+        </div>
+        <div data-role="footer" class="centerbox">
+            <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
+        </div>
+    </div>
+    <!-- Notables Search -->
+    <div data-role="page" id="notables" data-title="hunt's ebirds | notables">
+        <div data-role="header" data-id="site-header">
+            <a href="#nav-panel-notables" data-icon="bars" data-iconpos="notext">Menu</a>
+            <h1><a href="index.mobile.html">home</a></h1>
+        </div>
+        <div data-role="main" class="ui-content">
+            <!-- Autocomplete -->
+            <form class="ui-filterable"><input id="autocomplete-input-notables" data-type="search" placeholder="Search for State or County" autofocus="autofocus"></form>
+            <ul id="autocomplete-items-notables" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input-notables"></ul>
+            <!-- Nav Panel -->
+            <div data-role="panel" id="nav-panel-notables" data-display="overlay" data-position="left">
+                <ul data-role="listview">
+                <li><a href="#notables" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                <li><a href="#notables" id="gotoNotables" class="ui-btn ui-btn-active">notables</a></li>
+                </ul>
+            </div>
+        </div>
+        <div data-role="footer" class="centerbox">
+            <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
+        </div>
+    </div>
+    <!-- Sightings Results -->
+    <div data-role="page" id="sightings" data-title="hunt's ebirds | sightings">
+        <div data-role="header" data-id="site-header">
+            <a href="#nav-panel-sightings" data-icon="bars" data-iconpos="notext">Menu</a>
+            <h1><a href="index.mobile.html">home</a></h1>
+        </div>
+        <div role="main" class="ui-content">
+            <div id="message"></div>
+            <div id="results"></div>
+            <br />
+            <!-- Nav Panel -->
+            <div data-role="panel" id="nav-panel-sightings" data-display="overlay" data-position="left">
+                <ul data-role="listview">
+                <li><a href="#sightings" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                </ul>
+            </div>
+        </div>
+        <div data-role="footer" class="centerbox">
+            <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
+        </div>
+    </div>
+    <!-- Location Results -->
+    <div data-role="page" id="location" data-title="hunt's ebirds | location">
+        <div data-role="header" data-id="site-header">
+            <a href="#nav-panel-location" data-icon="bars" data-iconpos="notext">Menu</a>
+            <h1><a href="index.mobile.html">home</a></h1>
+        </div>
+        <div role="main" class="ui-content">
+            <div id="message"></div>
+            <div id="results"></div>
+            <br />
+            <!-- Nav Panel -->
+            <div data-role="panel" id="nav-panel-location" data-display="overlay" data-position="left">
+                <ul data-role="listview">
+                <li><a href="#location" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                </ul>
+            </div>
+        </div>
+        <div data-role="footer" class="centerbox">
+            <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
+        </div>
+    </div>
+    <!-- Species Results -->
+    <div data-role="page" id="species" data-title="hunt's ebirds | species">
+        <div data-role="header" data-id="site-header">
+            <a href="#nav-panel-species" data-icon="bars" data-iconpos="notext">Menu</a>
+            <h1><a href="index.mobile.html">home</a></h1>
+        </div>
+        <div role="main" class="ui-content">
+            <div id="message"></div>
+            <div id="results"></div>
+            <br />
+            <!-- Nav Panel -->
+            <div data-role="panel" id="nav-panel-species" data-display="overlay" data-position="left">
+                <ul data-role="listview">
+                <li><a href="#species" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                </ul>
+            </div>
+        </div>
+        <div data-role="footer" class="centerbox">
+            <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
+        </div>
+    </div>
+    <!-- Donate -->
+    <!-- Providers -->
 </body>
 </html>
