@@ -43,6 +43,31 @@ jQuery.extend({
 });
 
 jQuery.extend({
+    getData: function(resultsToGet, regionToGet, region, search) {
+        var data = "";
+        var storedData = sessionStorage.getItem(resultsToGet);
+        var storedRegion = sessionStorage.getItem(regionToGet);
+        
+        // Stored data present is for selected region.
+        if ((storedData != null && storedRegion != null) && storedRegion == region) {
+            console.log('session data...');
+            data = JSON.parse(storedData);
+        } else { // No stored data, or region has changed.
+            console.log('ebird data...');
+            var url = $.geteBirdApiUrl(region, search);
+            data = $.getValues(url, "json");
+            
+            storedData = JSON.stringify(data);
+            
+            sessionStorage.setItem(resultsToGet, storedData);
+            sessionStorage.setItem(regionToGet, region);
+        }
+        
+        return data;
+    }
+});
+
+jQuery.extend({
 	geteBirdApiUrl: function(selection, api) {
 		var url = "";
 		
@@ -111,9 +136,6 @@ jQuery.extend({
 jQuery.extend({
 	buildTableHeaders: function(idName, className, heading1, heading2, heading3, heading4, heading5) {
 		var table = document.createElement("table");
-        //data-role="table" id="table-column-toggle" data-mode="columntoggle" class="ui-responsive table-stroke"
-        //<table data-role="table" id="phone-table" data-mode="columntoggle" data-column-btn-text="Compare..." data-column-btn-theme="a" class="phone-compare ui-shadow table-stroke">
-		
         table.setAttribute("id", idName);
 		table.setAttribute("class", className);
         table.setAttribute("data-role", "table");
@@ -123,15 +145,19 @@ jQuery.extend({
 		var tr = document.createElement('tr');
 		var th1 = document.createElement('th');
 		var th2 = document.createElement('th');
-		var th3 = document.createElement('th');
+        var th3 = document.createElement('th');
+
+		if (heading5 != "Observer") {
+            th3.setAttribute("data-priority", "1");
+        }
 
 		th1.innerHTML = heading1;
 		tr.appendChild(th1);
 		th2.innerHTML = heading2;
 		tr.appendChild(th2);
-		th3.innerHTML = heading3;
-		tr.appendChild(th3);
-		
+        th3.innerHTML = heading3;
+        tr.appendChild(th3);
+        
 		if (heading4 != "") {
             var th4 = document.createElement('th');
             th4.setAttribute("data-priority", "2");
@@ -163,7 +189,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getChecklistsTable: function(data, selection) {
-		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Location / Hotspot", "Recent Species", "Date", "", "");
+		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Location / Hotspot", "Date", "Recent Species", "", "");
 		var tbody = document.createElement('tbody');		
 		
 		var speciesCount = 0;
@@ -183,8 +209,8 @@ jQuery.extend({
 				var obsDt = data[i-1].obsDt;
 				
 				row = $.buildTableCell(locName, row);
-				row = $.buildTableCell(howMany, row);
 				row = $.buildTableCell(obsDt, row);
+				row = $.buildTableCell(howMany, row);
 				
 				tbody.appendChild(row);
 				
@@ -230,7 +256,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getLocationTable: function(data) {
-		var table = $.buildTableHeaders("locationTable", "tablesorter", "Species Name", "Count", "Date / Checklist", "", "");
+		var table = $.buildTableHeaders("locationTable", "tablesorter", "Species Name", "Date / Checklist", "Count", "", "");
 		var tbody = document.createElement('tbody');
 
 		for (var i = 0; i < data.length; i++) {
@@ -241,8 +267,8 @@ jQuery.extend({
 			var obsDt = '<a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt;
 			
 			row = $.buildTableCell(species, row);
-			row = $.buildTableCell(howMany, row);
 			row = $.buildTableCell(obsDt, row);
+			row = $.buildTableCell(howMany, row);
 			
 			tbody.appendChild(row);
 		}
@@ -254,7 +280,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getSpeciesTable: function(data, regName) {
-		var table = $.buildTableHeaders("speciesTable", "tablesorter", "Location / Hotspot", "Count", "Date", "", "");
+		var table = $.buildTableHeaders("speciesTable", "tablesorter", "Location / Hotspot", "Date", "Count", "", "");
 		var tbody = document.createElement('tbody');
 
 		for (var i = 0; i < data.length; i++) {
@@ -265,8 +291,8 @@ jQuery.extend({
 			var date = data[i].obsDt;
 
 			row = $.buildTableCell(location, row);
-			row = $.buildTableCell(count, row);
 			row = $.buildTableCell(date, row);
+			row = $.buildTableCell(count, row);
 			
 			tbody.appendChild(row);
 		}

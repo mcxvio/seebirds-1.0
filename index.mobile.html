@@ -60,7 +60,7 @@
                 });
             });
             
-            var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "" }
+            var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" }
 
             // Load autocomplete values & handle selection.
             $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
@@ -106,115 +106,82 @@
             $(document).on("pagecontainerbeforeshow", function(event, ui){
                 var toPage = ui.toPage[0].id;
                 var prevPage = ui.prevPage.attr('id');
+                var table = "";
+                var message = "";
+                var tableName = "";
+                var data = "";
+                var page = "";
                 
                 if (toPage == "sightings") {
+                    page = "#sightings";
                     var region = selectedData.region;
                     
                     if (region.length > 0) {
-                        var table = "";
-                        var message = "";
-                        var tableName = "";
-                        var data = "";
                         $("#sightings #message").html("");
                         $("#sightings #results").html("");
                     
-                        if (prevPage == "notables") {
-                            var storedData = sessionStorage.getItem("notablesResults");
-                            var storedRegion = sessionStorage.getItem("notablesRegion");
-                            if ((storedData != null && storedRegion != null) && storedRegion == selectedData.region) {
-                                data = JSON.parse(storedData);
-                            } else {
-                                var url = $.geteBirdApiUrl(region, "notables");
-                                data = $.getValues(url, "json");
+                        if (prevPage == "notables" ||
+                            (selectedData.startPage == "notables" && prevPage == "location"|| prevPage == "species")) {
 
-                                var storedData = JSON.stringify(data);
-                                sessionStorage.setItem("notablesResults", storedData);
-                                sessionStorage.setItem("notablesRegion", selectedData.region);
-                            }
+                            selectedData.startPage = "notables";
+                            console.log('getData: ' + prevPage + ", " + selectedData.startPage);
+                            data = $.getData("notablesResults", "notablesRegion", region, "notables");
+                            
                             if (data.length > 0) {
                                 table = $.getNotablesTable(data, region);
                                 message = "<p>Notable species for " + region + ", in last 5 days: " + data.length + ".</p>";
-                            } else {
-                                message = noDataFound;
                             }
                         }
-                        if (prevPage == "checklists") {
-                            var storedData = sessionStorage.getItem("checklistsResults");
-                            var storedRegion = sessionStorage.getItem("checklistsRegion");
-                            if ((storedData != null && storedRegion != null) && storedRegion == selectedData.region) {
-                                data = JSON.parse(storedData);
-                            } else {
-                                var url = $.geteBirdApiUrl(region, "checklists");
-                                data = $.getValues(url, "json");
+                        if (prevPage == "checklists"  ||
+                            (selectedData.startPage == "checklists" && prevPage == "location"|| prevPage == "species")) {
 
-                                var storedData = JSON.stringify(data);
-                                sessionStorage.setItem("checklistsResults", storedData);
-                                sessionStorage.setItem("checklistsRegion", selectedData.region);
-                            }
+                            selectedData.startPage = "checklists";
+                            console.log('get checklists: ' + prevPage + ", " + selectedData.startPage);
+                            data = $.getData("checklistsResults", "checklistsRegion", region, "checklists");
+
                             if (data.length > 0) {
                                 table = $.getChecklistsTable(data, region);
                                 message = "<p>Checklists with number of species seen most recently in " + region + ", in last 5 days: " + (table.rows.length-1) + ".</p>";
-                            } else {
-                                message = noDataFound;
                             }
-                        }
-                        if (table != "" && table.rows.length > 1) {
-                            $("#sightings #message").html(message);
-                            $("#sightings #results").html(table);
-                            $("#sightingsTable").tablesorter();
-                            $("#sightingsTable").table();
                         }
                     } else {
                         $("#sightings #message").html("<p><a href='#nav-panel-sightings'>Select</a> from Checklists or Notables to search State or County sightings.</p>");
                     }
                 }
                 if (toPage == "location") {
+                    page = "#location";
                     var locId = selectedData.locId;
                     var locName = selectedData.locName;
                     var region = selectedData.region;
-                    
-                    /*console.log("gotoLocation, locId: " + locId);
-                    console.log("gotoLocation, locName: " + locName);
-                    console.log("gotoLocation, region : " + region);*/
                     
                     var url = $.geteBirdApiUrl(locId, "location");
                     var data = $.getValues(url, "json");
                     
                     if (data.length > 0) {
-                        var table = $.getLocationTable(data);
-                        
-                        $("#location #results").html(table);
-                        $("#location #message").html('<p>Sightings at <a href="http://ebird.org/ebird/hotspot/' + locId + '" target="_blank">' + locName + '</a> in last 14 days: ' + data.length + ".</p>");
-                        $("#locationTable").tablesorter();
-                        $("#locationTable").table();
-                    } else {
-                        $("#location #results").html("");
-                        $("#location #message").html(noDataFound);
+                        table = $.getLocationTable(data);
+                        message = '<p>Sightings at <a href="http://ebird.org/ebird/hotspot/' + locId + '" target="_blank">' + locName + '</a> in last 14 days: ' + data.length + '.</p>';
                     }
                 }
                 if (toPage == "species") {
+                    page = "#species";
                     var sciName = selectedData.sciName;
                     var comName = selectedData.comName;
                     var region = selectedData.region;
 
-                    /*console.log("toPage species, sciName: " + sciName);
-                    console.log("toPage species, comName: _" + comName + "_");
-                    console.log("toPage species, region : " + region);*/
-                    
                     var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
                     var data = $.getValues(url, "json");
                     
                     if (data.length > 0) {
-                        var table = $.getSpeciesTable(data, region);
-
-                        $("#species #results").html(table);
-                        $("#species #message").html("<p>Sightings of <strong>" + comName + "</strong> in " + region + " in last 14 days: " + data.length + ".</p>");
-                        $("#speciesTable").tablesorter();
-                        $("#speciesTable").table();
-                    } else {
-                        $("#species #results").html("");
-                        $("#species #message").html(noDataFound);
+                        table = $.getSpeciesTable(data, region);
+                        message = "<p>Sightings of <strong>" + comName + "</strong> in " + region + " in last 14 days: " + data.length + ".</p>";
                     }
+                }
+                
+                if (table != "" && table.rows.length > 1) {
+                    $(page + " #message").html(message);
+                    $(page + " #results").html(table);
+                    $(page + "Table").tablesorter();
+                    $(page + "Table").table();
                 }
             });
 
