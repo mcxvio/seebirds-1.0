@@ -245,7 +245,7 @@ jQuery.extend({
 			row = $.buildTableCell(obsDt, row);
 			row = $.buildTableCell(howMany, row);
             row = $.buildTableCell(userName, row);
-			
+
 			tbody.appendChild(row);
 		}
 		
