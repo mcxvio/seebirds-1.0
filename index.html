@@ -47,6 +47,9 @@
             // Load autocomplete values & handle selection.
             $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
                 var page = $(this).attr("id");
+                
+                console.log("pagecreate: "+page);
+                
                 if (page == "checklists" || page == "notables") {
                     var xml = $.getValues(urlBase + dataFile, "xml");
                     var filteredList = $(xml).filterNode("region");
@@ -95,13 +98,15 @@
                 var data = "";
                 var page = "";
                 
+                console.log("pagecontainerbeforeshow: " + toPage);
+                
                 if (toPage == "checklistSightings") {
                     page = "#checklistSightings";
                     var region = selectedData.region;
                     if (region.length > 0) {
                         selectedData.startPage = "checklists";
                         tableName = "#checklistSightingsTable";
-                        console.log('get checklists: ' + prevPage + ", " + selectedData.startPage);
+                        //console.log('get checklists: ' + prevPage + ", " + selectedData.startPage);
                         data = $.getData("checklistsResults", "checklistsRegion", region, "checklists");
 
                         if (data.length > 0) {
@@ -118,7 +123,7 @@
                     if (region.length > 0) {
                         selectedData.startPage = "notables";
                         tableName = "#notableSightingsTable";
-                        console.log('getData: ' + prevPage + ", " + selectedData.startPage);
+                        //console.log('getData: ' + prevPage + ", " + selectedData.startPage);
                         data = $.getData("notablesResults", "notablesRegion", region, "notables");
                         
                         if (data.length > 0) {
@@ -150,14 +155,15 @@
                     var sciName = selectedData.sciName;
                     var comName = selectedData.comName;
                     var region = selectedData.region;
+                    var storedData = sessionStorage.setItem("speciesName", comName);
 
                     var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
                     var data = $.getValues(url, "json");
                     
                     if (data.length > 0) {
                         table = $.getSpeciesTable(data, region);
-                        message = "Sightings of <strong>" + comName + "</strong> in " + region + " in last 14 days: " + data.length + ".";
-                        //message = 'Sightings of <a href="' + urlBase + 'species.html">' + comName + '</a> in ' + region + ' in last 14 days: ' + data.length + '.';
+                        //message = "Sightings of <strong>" + comName + "</strong> in " + region + " in last 14 days: " + data.length + ".";
+                        message = 'Sightings of <a href="identify.html" rel="external" data-ajax="false">' + comName + '</a> in ' + region + ' in last 14 days: ' + data.length + '.';
                     } else {
                          $(page + " #message").html(noSpeciesDataFound);
                     }
@@ -167,6 +173,40 @@
                     $(page + " #results").html(table);
                     $(tableName).tablesorter();
                     $(tableName).table();
+                }
+                
+                if (toPage == "description") {
+                    var speciesName = sessionStorage.getItem("speciesName");
+                    speciesName = $.capitalizeFirstLetter(speciesName.toLowerCase());
+                    speciesName = speciesName.replace(/ /g,"%20");
+                    console.log("species: " + speciesName);
+                    
+                    var result = "";
+                    
+                    $.ajax({
+                        //url: "http://en.wikipedia.org/w/api.php?action=parse&format=json&page=" + speciesName + "&callback=?",
+                        url: "http://en.wikipedia.org/w/api.php?action=query&prop=extracts&format=json&titles=" + speciesName + "&callback=?",
+                        //url: "http://en.wikipedia.org/w/api.php?action=parse&page=Hermit%20thrush&callback=?",
+                        type: "get",
+                        dataType: "json",
+                        async: false,
+                        success: function(data) {
+                            result = data;
+                            
+                            //console.log(JSON.stringify(data.parse.text['*']));
+                            //$("#description #results").html(JSON.stringify(data.parse.text['*']));
+                          
+                            $("#description #message").html(""); // Put link to wikipedia page here?
+                            $.each(data.query.pages, function(idx, page){
+                                console.log(page.extract);
+                                //$("#description #results").html('<a href="' + page.pageid + '">' + page.title + "</a>");
+                                $("#description #results").html(page.extract);
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
                 }
             });
 

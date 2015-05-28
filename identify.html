@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hunt's internet Birds</title>
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="script.custom/jquery.custom.mobile.js"></script>
+    <!-- jQM -->
+    <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <!-- end jQM -->
+    <link rel="stylesheet" type="text/css" href="style.custom/styles.custom.css">
+    <script>
+        //var urlBase = "http://huntsebirds.appspot.com/";
+        var urlBase = "http://localhost:8080/mebird/";
+        var wikiBase = "http://en.wikipedia.org/wiki/"
+
+        /*
+        $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
+            console.log("1.pagecreate");
+        });
+        
+        $(document).on("pageinit", function(event) {
+            console.log("2.pageinit");
+        });
+        */
+        
+        $(document).pagecontainer({ beforeshow: function(event, ui) { } });
+        // Load results data.
+        $(document).on("pagecontainerbeforeshow", function(event, ui){
+            console.log("3.pagecontainerbeforeshow");
+            
+            var speciesName = sessionStorage.getItem("speciesName");
+            speciesName = $.capitalizeFirstLetter(speciesName.toLowerCase());
+            speciesName = speciesName.replace(/ /g,"%20");
+            console.log("species: " + speciesName);
+          
+            var wikiPage = wikiBase + speciesName.replace(/%20/g,"_");
+
+            var result = "";
+            var output = "";
+            var list = "";
+            
+            $.ajax({
+                url: "http://en.wikipedia.org/w/api.php?action=query&prop=extracts&format=json&titles=" + speciesName + "&callback=?",
+                //url: "http://en.wikipedia.org/w/api.php?action=parse&format=json&page=" + speciesName + "&callback=?",
+                //url: "http://en.wikipedia.org/w/api.php?action=parse&page=Hermit%20thrush&callback=?",
+                type: "get",
+                dataType: "json",
+                async: false,
+                success: function(data) {
+                    result = data;
+                    $.each(data.query.pages, function(idx, page) {
+                        var extract = page.extract;
+                        //console.log(page.extract);
+                        
+                        var start = extract.indexOf("<p>");
+                        var end = extract.lastIndexOf("<h2><span id=\"References\">References</span></h2>");//extract.lastIndexOf("</p>");
+                        output = extract.slice(start, end);
+                        console.log("extract.slice: " + output);
+                    });
+                    
+                    $.ajax({
+                        url: "http://en.wikipedia.org/w/api.php?action=query&prop=extlinks&ellimit=100&format=json&titles=" + speciesName + "&callback=?",
+                        type: "get",
+                        dataType: "json",
+                        async: false,
+                        success: function(data) {
+                            result = data;
+                            
+                            $.each(data.query.pages, function(idx, page) {
+                                list = "<h2>External Links</h2>";
+                                list += "<ul>";
+                                list += "<li><a href=\"" + wikiPage + "\" target=\"_blank\">Read more at Wikipedia</a></li>";
+                                var name = speciesName.replace(/%20/g," ");
+                                $.each(page.extlinks, function(key, val) {
+                                    var lnx = JSON.stringify(val);
+                                    if (lnx.indexOf("http") > 0) {
+                                        var url = lnx.slice(lnx.indexOf("http"), lnx.lastIndexOf("\""));
+                                        //console.log("lnx=" + lnx);
+                                        console.log("url=" + lnx.slice(lnx.indexOf("http"), lnx.lastIndexOf("\"")));
+                                        
+                                        if (url.indexOf("ibc.lynxeds.com") > 0) {
+                                            list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " videos, photos and sounds</a> at the Internet Bird Collection</li>";
+                                        } else if (url.indexOf("www.birds.cornell.edu") > 0) {
+                                            list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " species account</a> at Cornell Lab for Ornithology</li>";
+                                        } else if (url.indexOf("vireo.acnatsci.org") > 0) {
+                                            list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " photo gallery</a> at VIREO (Drexel University)</li>";
+                                        } else if (url.indexOf("iucnredlist") > 0) {
+                                            list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " conservation status</a> at IUCN</li>";
+                                        } else if (url.indexOf("rspb.org") > 0) {
+                                            list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " UK species account</a> at RSPB</li>";
+                                        } else if (url.indexOf("www.arkive.org") > 0) {
+                                            list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " species photos</a> at ARKive</li>";
+                                        }
+                                    }
+                                });
+                                list += "</ul>";
+                            });
+                            
+                            $("#description #title").html(speciesName.replace(/%20/g," "));
+                            $("#description #info").html(output);                
+                            $("#description #info").append(list);                    
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        });
+       
+        (function( $ ) {
+        console.log("A");
+            $(function() { // On document ready
+        console.log("B");
+            });
+        });
+    </script>
+</head>
+<body>
+    <!-- Search -->
+    <!-- Description -->
+    <div data-role="page" id="description" data-title="home">
+        <div data-role="header" data-id="site-header" data-position="inline">
+            <h1><a href="index.html" rel="external" data-ajax="false">home</a></h1>
+        </div>
+        <div role="main" class="iu-content" style="height: 100%">
+            <div id="title"></div>
+            <div id="info"></div>
+        </div>
+        <br><br>
+        <div data-role="footer" class="centerbox">
+            <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://en.wikipedia.org" target="_blank">Wikipedia</a></p>
+        </div>
+    </div>
+    <!-- Images -->
+    <!-- Sounds -->
+</body>
+</html>

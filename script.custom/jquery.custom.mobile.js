@@ -67,6 +67,11 @@ jQuery.extend({
     }
 });
 
+/*jQuery.extend({
+    getWikipediaUrl: function(selection) {
+    }
+});*/
+
 jQuery.extend({
 	geteBirdApiUrl: function(selection, api) {
 		var url = "";
@@ -132,6 +137,12 @@ jQuery.extend({
 	}
 });
 
+jQuery.extend({
+    capitalizeFirstLetter: function(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+});
+
 // START: Get Tables.
 jQuery.extend({
 	buildTableHeaders: function(idName, className, heading1, heading2, heading3, heading4, heading5) {
@@ -189,7 +200,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getChecklistsTable: function(data, selection) {
-		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Location / Hotspot", "Date", "Recent Species", "", "");
+		var table = $.buildTableHeaders("checklistSightingsTable", "tablesorter", "Location / Hotspot", "Date", "Recent Species", "", "");
 		var tbody = document.createElement('tbody');		
 		
 		var speciesCount = 0;
@@ -197,7 +208,6 @@ jQuery.extend({
 		var prevLocNameDate = data[0].locName + ";" + data[0].obsDt;
 		
 		for (var i = 0; i < data.length; i++) {
-			
 			locNameDate = data[i].locName + ";" + data[i].obsDt;
 				
 			if (prevLocNameDate != locNameDate) {
@@ -220,15 +230,15 @@ jQuery.extend({
 				speciesCount++;				
 			}
 		}
-		
-		table.appendChild(tbody);		
+		table.appendChild(tbody);
+
 		return table;
 	}
 });
 
 jQuery.extend({
 	getNotablesTable: function(data, selection) {
-		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species Name", "Location", "Date / Checklist", "Count", "Observer");
+		var table = $.buildTableHeaders("notableSightingsTable", "tablesorter", "Species Name", "Location", "Date / Checklist", "Count", "Observer");
 		var tbody = document.createElement('tbody');
         
 		for (var i = 0; i < data.length; i++) {
@@ -248,7 +258,6 @@ jQuery.extend({
 
 			tbody.appendChild(row);
 		}
-		
 		table.appendChild(tbody);
 		return table;
 	}
