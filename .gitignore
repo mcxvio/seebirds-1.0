@@ -44,3 +44,5 @@ Temporary Items
 *.bak
 *.yaml
 main.py
+dunlin_extract.html
+wikipedia_image_example.txt

@@ -55,7 +55,7 @@
                     var filteredList = $(xml).filterNode("region");
                     
                     var tags = (page == "checklists") ? "#autocomplete-items-checklists" : "#autocomplete-items-notables";
-                    var href = (page == "checklists") ? "#checklistSightings" : "#notableSightings";
+                    var href = (page == "checklists") ? "#submissions" : "#sightings";
                     
                     $(tags).on("filterablebeforefilter", function ( e, data ) {
                         var $ul = $( this ),
@@ -100,12 +100,12 @@
                 
                 console.log("pagecontainerbeforeshow: " + toPage);
                 
-                if (toPage == "checklistSightings") {
-                    page = "#checklistSightings";
+                if (toPage == "submissions") {
+                    page = "#submissions";
                     var region = selectedData.region;
                     if (region.length > 0) {
-                        selectedData.startPage = "checklists";
-                        tableName = "#checklistSightingsTable";
+                        //selectedData.startPage = "checklists";
+                        tableName = "#submissionsTable";
                         //console.log('get checklists: ' + prevPage + ", " + selectedData.startPage);
                         data = $.getData("checklistsResults", "checklistsRegion", region, "checklists");
 
@@ -117,12 +117,12 @@
                         $(page + " #message").html("<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.");
                     }
                 }
-                if (toPage == "notableSightings") {
-                    page = "#notableSightings";
+                if (toPage == "sightings") {
+                    page = "#sightings";
                     var region = selectedData.region;
                     if (region.length > 0) {
-                        selectedData.startPage = "notables";
-                        tableName = "#notableSightingsTable";
+                        //selectedData.startPage = "notables";
+                        tableName = "#sightingsTable";
                         //console.log('getData: ' + prevPage + ", " + selectedData.startPage);
                         data = $.getData("notablesResults", "notablesRegion", region, "notables");
                         
@@ -155,7 +155,9 @@
                     var sciName = selectedData.sciName;
                     var comName = selectedData.comName;
                     var region = selectedData.region;
-                    var storedData = sessionStorage.setItem("speciesName", comName);
+                    //var storedData = sessionStorage.setItem("speciesName", comName);
+                    
+                    sessionStorage.setItem("identification", JSON.stringify(selectedData));
 
                     var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
                     var data = $.getValues(url, "json");
@@ -176,6 +178,7 @@
                 }
                 
                 if (toPage == "description") {
+                    /*
                     var speciesName = sessionStorage.getItem("speciesName");
                     speciesName = $.capitalizeFirstLetter(speciesName.toLowerCase());
                     speciesName = speciesName.replace(/ /g,"%20");
@@ -207,6 +210,7 @@
                             console.log(error);
                         }
                     });
+                    */
                 }
             });
 
@@ -235,7 +239,7 @@
         <div data-role="header" data-id="site-header" data-position="inline">
             <h1><a href="index.html">home</a></h1>
         </div>
-        <div role="main" class="iu-content" style="height: 100%">
+        <div role="main" class="iu-content">
             <ul data-role="listview"><li><a id="gotoChecklists" href="#checklists">checklists</a></li>
             <li><a id="gotoNotables" href="#notables">notables</a></li></ul>
         </div>
@@ -267,7 +271,7 @@
         </div>
     </div>
     <!-- Checklists / Sightings Results -->
-    <div data-role="page" id="checklistSightings" data-title="hunt's ebirds | sightings">
+    <div data-role="page" id="submissions" data-title="hunt's ebirds | sightings">
         <div data-role="header" data-id="site-header">
             <a href="#nav-panel-checklist-sightings" data-icon="bars" data-iconpos="notext">Menu</a>
             <h1><a href="index.html">home</a></h1>
@@ -279,7 +283,7 @@
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-checklist-sightings" data-display="overlay" data-position="left">
                 <ul data-role="listview">
-                <li><a href="#checklistSightings" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                <li><a href="#submissions" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
                 <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
                 <li><a href="#notables" id="gotoNotables">notables</a></li>
                 </ul>
@@ -313,7 +317,7 @@
         </div>
     </div>
     <!-- Notable Sightings Results -->
-    <div data-role="page" id="notableSightings" data-title="hunt's ebirds | sightings">
+    <div data-role="page" id="sightings" data-title="hunt's ebirds | sightings">
         <div data-role="header" data-id="site-header">
             <a href="#nav-panel-notable-sightings" data-icon="bars" data-iconpos="notext">Menu</a>
             <h1><a href="index.html">home</a></h1>
@@ -325,7 +329,7 @@
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-notable-sightings" data-display="overlay" data-position="left">
                 <ul data-role="listview">
-                <li><a href="#notableSightings" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                <li><a href="#sightings" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
                 <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
                 <li><a href="#notables" id="gotoNotables">notables</a></li>
                 </ul>

@@ -29,89 +29,190 @@
         $(document).pagecontainer({ beforeshow: function(event, ui) { } });
         // Load results data.
         $(document).on("pagecontainerbeforeshow", function(event, ui){
-            console.log("3.pagecontainerbeforeshow");
-            
-            var speciesName = sessionStorage.getItem("speciesName");
-            speciesName = $.capitalizeFirstLetter(speciesName.toLowerCase());
-            speciesName = speciesName.replace(/ /g,"%20");
-            console.log("species: " + speciesName);
-          
-            var wikiPage = wikiBase + speciesName.replace(/%20/g,"_");
+            var toPage = ui.toPage[0].id;
 
-            var result = "";
-            var output = "";
-            var list = "";
+            console.log("3.pagecontainerbeforeshow, page: " + toPage);
+
+            var data = JSON.parse(sessionStorage.getItem("identification"));
+            var speciesName = $.capitalizeFirstLetter(data.comName.toLowerCase());
+            speciesName = speciesName.replace(/ /g,"%20");
+            console.log(data);
+            console.log("species: " + speciesName);
+            var wikiPage = wikiBase + speciesName.replace(/%20/g,"_");
             
-            $.ajax({
-                url: "http://en.wikipedia.org/w/api.php?action=query&prop=extracts&format=json&titles=" + speciesName + "&callback=?",
-                //url: "http://en.wikipedia.org/w/api.php?action=parse&format=json&page=" + speciesName + "&callback=?",
-                //url: "http://en.wikipedia.org/w/api.php?action=parse&page=Hermit%20thrush&callback=?",
-                type: "get",
-                dataType: "json",
-                async: false,
-                success: function(data) {
-                    result = data;
-                    $.each(data.query.pages, function(idx, page) {
-                        var extract = page.extract;
-                        //console.log(page.extract);
+            if (toPage == "description") {
+                var result = "";
+                var output = "";
+                var list = "";
+                
+                $.ajax({
+                    //url: "http://en.wikipedia.org/w/index.php?title=" + speciesName + "&action=render&callback=?",
+                    url: "http://en.wikipedia.org/w/api.php?action=query&prop=extracts&format=json&titles=" + speciesName + "&callback=?",
+                    //url: "http://en.wikipedia.org/w/api.php?action=parse&format=json&page=" + speciesName + "&callback=?",
+                    //url: "http://en.wikipedia.org/w/api.php?action=parse&page=Hermit%20thrush&callback=?",
+                    type: "get",
+                    dataType: "json",
+                    async: false,
+                    success: function(data) {
+                        result = data;
+                        $.each(data.query.pages, function(idx, page) {
+                            var extract = page.extract;
+                            //console.log(page.extract);
+                            
+                            var start = extract.indexOf("<p>");
+                            var end = 0;
+                            if (extract.lastIndexOf("<h2><span id=\"Photo_gallery\">Photo gallery</span></h2>") > 0) {
+                                end = extract.lastIndexOf("<h2><span id=\"Photo_gallery\">Photo gallery</span></h2>");//extract.lastIndexOf("</p>");
+                            } else {
+                                end = extract.lastIndexOf("<h2><span id=\"References\">References</span></h2>");//extract.lastIndexOf("</p>");
+                            }
+                            output = extract.slice(start, end);
+                            console.log("extract.slice: " + output);
+                        });
                         
-                        var start = extract.indexOf("<p>");
-                        var end = extract.lastIndexOf("<h2><span id=\"References\">References</span></h2>");//extract.lastIndexOf("</p>");
-                        output = extract.slice(start, end);
-                        console.log("extract.slice: " + output);
-                    });
-                    
-                    $.ajax({
-                        url: "http://en.wikipedia.org/w/api.php?action=query&prop=extlinks&ellimit=100&format=json&titles=" + speciesName + "&callback=?",
-                        type: "get",
-                        dataType: "json",
-                        async: false,
-                        success: function(data) {
-                            result = data;
-                            
-                            $.each(data.query.pages, function(idx, page) {
-                                list = "<h2>External Links</h2>";
-                                list += "<ul>";
-                                list += "<li><a href=\"" + wikiPage + "\" target=\"_blank\">Read more at Wikipedia</a></li>";
-                                var name = speciesName.replace(/%20/g," ");
-                                $.each(page.extlinks, function(key, val) {
-                                    var lnx = JSON.stringify(val);
-                                    if (lnx.indexOf("http") > 0) {
-                                        var url = lnx.slice(lnx.indexOf("http"), lnx.lastIndexOf("\""));
-                                        //console.log("lnx=" + lnx);
-                                        console.log("url=" + lnx.slice(lnx.indexOf("http"), lnx.lastIndexOf("\"")));
-                                        
-                                        if (url.indexOf("ibc.lynxeds.com") > 0) {
-                                            list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " videos, photos and sounds</a> at the Internet Bird Collection</li>";
-                                        } else if (url.indexOf("www.birds.cornell.edu") > 0) {
-                                            list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " species account</a> at Cornell Lab for Ornithology</li>";
-                                        } else if (url.indexOf("vireo.acnatsci.org") > 0) {
-                                            list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " photo gallery</a> at VIREO (Drexel University)</li>";
-                                        } else if (url.indexOf("iucnredlist") > 0) {
-                                            list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " conservation status</a> at IUCN</li>";
-                                        } else if (url.indexOf("rspb.org") > 0) {
-                                            list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " UK species account</a> at RSPB</li>";
-                                        } else if (url.indexOf("www.arkive.org") > 0) {
-                                            list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " species photos</a> at ARKive</li>";
+                        $.ajax({
+                            url: "http://en.wikipedia.org/w/api.php?action=query&prop=extlinks&ellimit=100&format=json&titles=" + speciesName + "&callback=?",
+                            type: "get",
+                            dataType: "json",
+                            async: false,
+                            success: function(data) {
+                                result = data;
+                                
+                                $.each(data.query.pages, function(idx, page) {
+                                    var name = speciesName.replace(/%20/g," ");
+
+                                    list = "<h2>More Information</h2>";
+                                    list += "<ul>";
+                                    list += "<li><a href=\"#images\">" + name + " images from Wikipedia</a></li>";
+                                    /*list += "<li><a href=\"#sounds\">" + name + " sounds from Xeno-Canto</a></li>";*/
+                                    list += "<li><a href=\"" + wikiPage + "\" target=\"_blank\">Read more at Wikipedia</a></li>";
+                                    
+                                    $.each(page.extlinks, function(key, val) {
+                                        var lnx = JSON.stringify(val);
+                                        if (lnx.indexOf("http") > 0) {
+                                            var url = lnx.slice(lnx.indexOf("http"), lnx.lastIndexOf("\""));
+                                            //console.log("lnx=" + lnx);
+                                            //console.log("url=" + lnx.slice(lnx.indexOf("http"), lnx.lastIndexOf("\"")));
+                                            
+                                            if (url.indexOf("ibc.lynxeds.com") > 0) {
+                                                list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " videos, photos and sounds</a> at the Internet Bird Collection</li>";
+                                            } else if (url.indexOf("www.birds.cornell.edu") > 0) {
+                                                list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " species account</a> at Cornell Lab for Ornithology</li>";
+                                            } else if (url.indexOf("vireo.acnatsci.org") > 0) {
+                                                list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " photo gallery</a> at VIREO (Drexel University)</li>";
+                                            } else if (url.indexOf("iucnredlist") > 0) {
+                                                list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " conservation status</a> at IUCN</li>";
+                                            } else if (url.indexOf("rspb.org") > 0) {
+                                                list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " UK species account</a> at RSPB</li>";
+                                            } else if (url.indexOf("www.arkive.org") > 0) {
+                                                list += "<li><a href=\"" + url + "\" target=\"_blank\">" + name + " species photos</a> at ARKive</li>";
+                                            }
                                         }
-                                    }
+                                    });
+                                    list += "</ul>";
                                 });
-                                list += "</ul>";
+                                
+                                $("#description #title").html(speciesName.replace(/%20/g," "));
+                                $("#description #info").html(output);                
+                                $("#description #info").append(list);                    
+                            },
+                            error: function(xhr, status, error) {
+                                console.log(error);
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(error);
+                    }
+                });
+            }
+
+            if (toPage == "sounds") {
+                /*
+                $("#sounds #title").html("hello world 1");
+                $("#sounds #info").html("hello world 2");
+                
+                var result = "";
+                
+                $.ajax({
+                    url: "http://www.xeno-canto.org/api/2/recordings?query=troglodytes%20troglodytes",
+                    //url: "http://en.wikipedia.org/w/api.php?action=query&prop=extracts&format=json&titles=" + speciesName + "&callback=?",
+                    type: "get",
+                    dataType: "json",
+                    async: false,
+                    success: function(data) {
+                        result = data;
+                        
+                        $.each(data.recordings, function(id, rec) {
+                            console.log(rec.url);
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(error);
+                    }
+                });
+                */
+            }
+            
+            if (toPage == "images") {
+            
+                var output = "";
+            
+                // Get images from Wikipedia page.
+                $.ajax({
+                    url: "http://en.wikipedia.org/w/api.php?action=query&prop=images&format=json&titles=" + speciesName + "&callback=?",
+                    type: "get",
+                    dataType: "json",
+                    async: false,
+                    success: function(data) {
+
+                        // Get image data from page.
+                        $.each(data.query.pages, function(idx, page) {
+                            console.log("0****** " + idx + " " + JSON.stringify(page));
+                            console.log("1****** " + page.images.length);
+
+                            // Get urls for the images.
+                            $.each(page.images, function(index, image) {
+                                var img = image.title.replace(/ /g,"_");
+                                console.log("2****** " + img);
+                                
+                                if (img.indexOf("jpg") > 0) {
+                                    $.ajax({
+                                        url: "http://en.wikipedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url&format=json&titles=" + img + "&callback=?",
+                                        //http://en.wikipedia.org/w/api.php?action=query&titles=File:Albert_Einstein_(Nobel).png&prop=imageinfo&iiprop=url&format=json
+                                        type: "get",
+                                        dataType: "json",
+                                        async: false,
+                                        success: function(data) {
+                                            console.log("a######" + JSON.stringify(data.query.pages[-1]));
+                                            console.log("b######" + JSON.stringify(data.query.pages[-1].imageinfo[0].url));
+                                            /*
+                                            $.each(data.query.pages, function(id, img) {
+                                                //var images = JSON.stringify(page);
+                                                console.log("######" + id + " " + img.imageinfo[0].url);
+                                            });
+                                            */
+                                            $("#images #info").append("<img src=\"" + data.query.pages[-1].imageinfo[0].url + "\" alt=\"\" height=\"200\" />");
+                                        },
+                                        error: function(xhr, status, error) {
+                                            console.log(error);
+                                        }
+                                    });
+                                }
                             });
-                            
-                            $("#description #title").html(speciesName.replace(/%20/g," "));
-                            $("#description #info").html(output);                
-                            $("#description #info").append(list);                    
-                        },
-                        error: function(xhr, status, error) {
-                            console.log(error);
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.log(error);
-                }
-            });
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(error);
+                    }
+                });
+                
+                var googimages = "<a href=\"http://www.google.com/search?q=" + speciesName.replace(/%20/g,"+") + "&biw=1472&bih=771&source=lnms&tbm=isch\" target=\"_blank\">" + speciesName.replace(/%20/g," ") + " images at Google<\a>";
+                var duckimages = "<a href=\"http://duckduckgo.com/?q=" + speciesName.replace(/%20/g,"+") + "&iax=1&ia=images\" target=\"_blank\">" + speciesName.replace(/%20/g," ") + " images at DuckDuckGo<\a>";
+                
+                $("#images #title").html(speciesName.replace(/%20/g," "));
+                $("#images #more").append("<br>" + googimages + "<br>" + duckimages + "<br><br>");
+            }
         });
        
         (function( $ ) {
@@ -125,7 +226,38 @@
 <body>
     <!-- Search -->
     <!-- Description -->
-    <div data-role="page" id="description" data-title="home">
+    <div data-role="page" id="description" data-title="identify">
+        <div data-role="header" data-id="site-header" data-position="inline">
+            <h1><a href="index.html" rel="external" data-ajax="false">home</a></h1>
+        </div>
+        <!--<div role="main" class="iu-content">
+            <iframe src="http://en.wikipedia.org/w/index.php?title=black%20skimmer&action=render" width="100%" height="600">
+            </iframe>
+        </div>-->
+        <div id="title"></div>
+        <div id="info"></div>
+        <br><br>
+        <div data-role="footer" class="centerbox">
+            <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://en.wikipedia.org" target="_blank">Wikipedia</a></p>
+        </div>
+    </div>
+    <!-- Images -->
+    <div data-role="page" id="images" data-title="images">
+        <div data-role="header" data-id="site-header" data-position="inline">
+            <h1><a href="index.html" rel="external" data-ajax="false">home</a></h1>
+        </div>
+        <div role="main" class="iu-content" style="height: 100%">
+            <div id="title"></div>
+            <div id="info"></div>
+            <div id="more"></div>
+        </div>
+        <br><br>
+        <div data-role="footer" class="centerbox">
+            <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://en.wikipedia.org" target="_blank">Wikipedia</a></p>
+        </div>
+    </div>
+    <!-- Sounds -->
+    <div data-role="page" id="sounds" data-title="sounds">
         <div data-role="header" data-id="site-header" data-position="inline">
             <h1><a href="index.html" rel="external" data-ajax="false">home</a></h1>
         </div>
@@ -135,10 +267,8 @@
         </div>
         <br><br>
         <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://en.wikipedia.org" target="_blank">Wikipedia</a></p>
+            <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://xeno-canto.org" target="_blank">Xeno-Canto</a></p>
         </div>
     </div>
-    <!-- Images -->
-    <!-- Sounds -->
 </body>
 </html>
