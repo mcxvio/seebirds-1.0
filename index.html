@@ -19,6 +19,8 @@
         var dataFile = "ebird_api_ref_list_test.xml";
         var noSpeciesDataFound = "No species sightings found.";
         var noLocationDataFound = "No location sightings found.";
+        var noNotableDataFound = "No notable sightings found.";
+        var noSubmissionsDataFound = "No checklist submissions found.";
 
         (function( $ ) {
             $(function() { // On document ready
@@ -104,7 +106,6 @@
                     page = "#submissions";
                     var region = selectedData.region;
                     if (region.length > 0) {
-                        //selectedData.startPage = "checklists";
                         tableName = "#submissionsTable";
                         //console.log('get checklists: ' + prevPage + ", " + selectedData.startPage);
                         data = $.getData("checklistsResults", "checklistsRegion", region, "checklists");
@@ -112,6 +113,8 @@
                         if (data.length > 0) {
                             table = $.getChecklistsTable(data, region);
                             message = "Checklists with number of species seen most recently in " + region + ", in last 5 days: " + (table.rows.length-1) + ".";
+                        } else {
+                            message = noSubmissionsDataFound;
                         }
                     } else {
                         $(page + " #message").html("<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.");
@@ -121,14 +124,14 @@
                     page = "#sightings";
                     var region = selectedData.region;
                     if (region.length > 0) {
-                        //selectedData.startPage = "notables";
                         tableName = "#sightingsTable";
                         //console.log('getData: ' + prevPage + ", " + selectedData.startPage);
                         data = $.getData("notablesResults", "notablesRegion", region, "notables");
-                        
                         if (data.length > 0) {
                             table = $.getNotablesTable(data, region);
                             message = "Notable species for " + region + ", in last 5 days: " + data.length + ".";
+                        } else {
+                            message = noNotableDataFound;
                         }
                     } else {
                         $(page + " #message").html("<a href='#nav-panel-notable-sightings'>Select</a> from Checklists or Notables to search State or County sightings.");
@@ -152,65 +155,45 @@
                 }
                 if (toPage == "species") {
                     page = "#species";
+
+                    console.log("selectedData: " + JSON.stringify(selectedData));
+                    console.log("sessionStorage: " + JSON.stringify(sessionStorage.getItem("identification")));
+                    
+                    if (selectedData.comName == "") {
+                        // Populate from session, passed back from identify page.
+                        console.log("get data FROM identify page");
+                        selectedData = JSON.parse(sessionStorage.getItem("identification"));
+                    } else {
+                        console.log("store data FOR identify page: " + JSON.stringify(selectedData));
+                        sessionStorage.setItem("identification", JSON.stringify(selectedData));
+                    }
+
                     var sciName = selectedData.sciName;
                     var comName = selectedData.comName;
                     var region = selectedData.region;
-                    //var storedData = sessionStorage.setItem("speciesName", comName);
-                    
-                    sessionStorage.setItem("identification", JSON.stringify(selectedData));
 
-                    var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
-                    var data = $.getValues(url, "json");
-                    
-                    if (data.length > 0) {
-                        table = $.getSpeciesTable(data, region);
-                        //message = "Sightings of <strong>" + comName + "</strong> in " + region + " in last 14 days: " + data.length + ".";
-                        message = 'Sightings of <a href="identify.html" rel="external" data-ajax="false">' + comName + '</a> in ' + region + ' in last 14 days: ' + data.length + '.';
+                    if (sciName != "") {
+                        var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
+                        var data = $.getValues(url, "json");
+                        
+                        if (data.length > 0) {
+                            table = $.getSpeciesTable(data, region);
+                            message = 'Sightings of <a href="identify.html" rel="external" data-ajax="false">' + comName + '</a> in ' + region + ' in last 14 days: ' + data.length + '.';
+                        } else {
+                             message = noSpeciesDataFound;
+                        }
                     } else {
-                         $(page + " #message").html(noSpeciesDataFound);
+                         message = noSpeciesDataFound;
                     }
                 }
                 if (table != "" && table.rows.length > 1) {
                     $(page + " #message").html(message);
                     $(page + " #results").html(table);
                     $(tableName).tablesorter();
-                    $(tableName).table();
-                }
-                
-                if (toPage == "description") {
-                    /*
-                    var speciesName = sessionStorage.getItem("speciesName");
-                    speciesName = $.capitalizeFirstLetter(speciesName.toLowerCase());
-                    speciesName = speciesName.replace(/ /g,"%20");
-                    console.log("species: " + speciesName);
-                    
-                    var result = "";
-                    
-                    $.ajax({
-                        //url: "http://en.wikipedia.org/w/api.php?action=parse&format=json&page=" + speciesName + "&callback=?",
-                        url: "http://en.wikipedia.org/w/api.php?action=query&prop=extracts&format=json&titles=" + speciesName + "&callback=?",
-                        //url: "http://en.wikipedia.org/w/api.php?action=parse&page=Hermit%20thrush&callback=?",
-                        type: "get",
-                        dataType: "json",
-                        async: false,
-                        success: function(data) {
-                            result = data;
-                            
-                            //console.log(JSON.stringify(data.parse.text['*']));
-                            //$("#description #results").html(JSON.stringify(data.parse.text['*']));
-                          
-                            $("#description #message").html(""); // Put link to wikipedia page here?
-                            $.each(data.query.pages, function(idx, page){
-                                console.log(page.extract);
-                                //$("#description #results").html('<a href="' + page.pageid + '">' + page.title + "</a>");
-                                $("#description #results").html(page.extract);
-                            });
-                        },
-                        error: function(xhr, status, error) {
-                            console.log(error);
-                        }
-                    });
-                    */
+                    //$(tableName).table();
+                } else if (message != "") {
+                    $(page + " #message").html(message);
+                    $(page + " #results").html("");
                 }
             });
 
@@ -270,7 +253,7 @@
             <p class="copyright">&copy 2015 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
         </div>
     </div>
-    <!-- Checklists / Sightings Results -->
+    <!-- Checklists Submissions Results -->
     <div data-role="page" id="submissions" data-title="hunt's ebirds | sightings">
         <div data-role="header" data-id="site-header">
             <a href="#nav-panel-checklist-sightings" data-icon="bars" data-iconpos="notext">Menu</a>

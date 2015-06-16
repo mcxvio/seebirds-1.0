@@ -67,11 +67,6 @@ jQuery.extend({
     }
 });
 
-/*jQuery.extend({
-    getWikipediaUrl: function(selection) {
-    }
-});*/
-
 jQuery.extend({
 	geteBirdApiUrl: function(selection, api) {
 		var url = "";
@@ -156,28 +151,31 @@ jQuery.extend({
 		var tr = document.createElement('tr');
 		var th1 = document.createElement('th');
 		var th2 = document.createElement('th');
-        var th3 = document.createElement('th');
-
-		if (heading5 != "Observer") {
-            th3.setAttribute("data-priority", "1");
-        }
 
 		th1.innerHTML = heading1;
 		tr.appendChild(th1);
 		th2.innerHTML = heading2;
 		tr.appendChild(th2);
-        th3.innerHTML = heading3;
-        tr.appendChild(th3);
+
+        if (heading3 != "") {
+            var th3 = document.createElement('th');
+
+            /*if (heading5 != "Observer") {
+                th3.setAttribute("data-priority", "1");
+            }*/
+            th3.innerHTML = heading3;
+            tr.appendChild(th3);
+        }
         
 		if (heading4 != "") {
             var th4 = document.createElement('th');
-            th4.setAttribute("data-priority", "2");
+            //th4.setAttribute("data-priority", "2");
 			th4.innerHTML = heading4;
 			tr.appendChild(th4);
 		}
         if (heading5 != "") {
             var th5 = document.createElement('th');
-            th5.setAttribute("data-priority", "3");
+            //th5.setAttribute("data-priority", "3");
             th5.innerHTML = heading5;
             tr.appendChild(th5);
         }
@@ -200,7 +198,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getChecklistsTable: function(data, selection) {
-		var table = $.buildTableHeaders("submissionsTable", "tablesorter", "Location / Hotspot", "Date", "Recent Species", "", "");
+		var table = $.buildTableHeaders("submissionsTable", "tablesorter", "Hotspot", "Date", "No. Species", "", "");
 		var tbody = document.createElement('tbody');		
 		
 		var speciesCount = 0;
@@ -238,7 +236,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getNotablesTable: function(data, selection) {
-		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species Name", "Location", "Date / Checklist", "Count", "Observer");
+		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species", "Hotspot", "Date [Checklist]", "Count", "Observer");
 		var tbody = document.createElement('tbody');
         
 		for (var i = 0; i < data.length; i++) {
@@ -247,12 +245,12 @@ jQuery.extend({
 			var species = '<a href="#species" class="gotoSpecies" title="'+ data[i].comName + ' (' + data[i].sciName + ')' + '" target="_self">' + data[i].comName + '</a>';
 			var obsDt = '<a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a>';
 			var howMany = data[i].howMany || 'X'; //ternary operator.
-			var locName = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
+            var locName = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
             var userName = data[i].userDisplayName;
-			
+
 			row = $.buildTableCell(species, row);
 			row = $.buildTableCell(locName, row);
-			row = $.buildTableCell(obsDt, row);
+            row = $.buildTableCell(obsDt, row);
 			row = $.buildTableCell(howMany, row);
             row = $.buildTableCell(userName, row);
 
@@ -265,18 +263,30 @@ jQuery.extend({
 
 jQuery.extend({
 	getLocationTable: function(data) {
-		var table = $.buildTableHeaders("locationTable", "tablesorter", "Species Name", "Date / Checklist", "Count", "", "");
+		var table = $.buildTableHeaders("locationTable", "tablesorter", "Species", "Count", "", "", "");
 		var tbody = document.createElement('tbody');
+        var previousDate = ""; //data[0].obsDt;
 
 		for (var i = 0; i < data.length; i++) {
 			var row = document.createElement('tr');
 			
 			var species = '<a href="#species" class="gotoSpecies" title="'+ data[i].comName + ' (' + data[i].sciName + ')' + '" target="_self">' + data[i].comName + '</a>';
 			var howMany = data[i].howMany || 'X'; //ternary operator.
-			var obsDt = '<a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt;
-			
+			var obsDt = "";
+            
+            // Show different visit dates as a row.
+            if (previousDate != data[i].obsDt) {
+                obsDt = 'Submitted <a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a> by ' + data[i].userDisplayName;
+                var dateRow = document.createElement('tr');
+                var cell = document.createElement('td');
+                cell.setAttribute("colspan", "2");
+                cell.setAttribute("class", "header");
+                cell.innerHTML = obsDt;
+                dateRow.appendChild(cell);
+                tbody.appendChild(dateRow);
+                previousDate = data[i].obsDt;
+            }
 			row = $.buildTableCell(species, row);
-			row = $.buildTableCell(obsDt, row);
 			row = $.buildTableCell(howMany, row);
 			
 			tbody.appendChild(row);
@@ -289,7 +299,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getSpeciesTable: function(data, regName) {
-		var table = $.buildTableHeaders("speciesTable", "tablesorter", "Location / Hotspot", "Date", "Count", "", "");
+		var table = $.buildTableHeaders("speciesTable", "tablesorter", "Hotspot", "Date", "Count", "", "");
 		var tbody = document.createElement('tbody');
 
 		for (var i = 0; i < data.length; i++) {

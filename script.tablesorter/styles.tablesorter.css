@@ -37,6 +37,9 @@
 	table.tablesorter tbody tr:hover td {
 		background-color: #e0edf4;
 	}
-    table td {
+    /*table td {
         border: 1px solid #e0edf4;
+    }*/
+    table.tablesorter td.header {
+        background-color: #f4f4f4;
     }
