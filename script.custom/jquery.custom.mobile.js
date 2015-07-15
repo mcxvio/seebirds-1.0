@@ -145,7 +145,7 @@ jQuery.extend({
         table.setAttribute("id", idName);
 		table.setAttribute("class", className);
         table.setAttribute("data-role", "table");
-        table.setAttribute("data-mode", "columntoggle");
+        //table.setAttribute("data-mode", "columntoggle");
         
 		var thead = document.createElement('thead');
 		var tr = document.createElement('tr');
@@ -236,23 +236,52 @@ jQuery.extend({
 
 jQuery.extend({
 	getNotablesTable: function(data, selection) {
-		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species", "Hotspot", "Date [Checklist]", "Count", "Observer");
+		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species", "Hotspot", "Count", "", "");
 		var tbody = document.createElement('tbody');
-        
+        var prevLocationDateTime = "";
+        var prevSpeciesName = "";
+        var prevSubId = "";
+        var observers = "";
+
 		for (var i = 0; i < data.length; i++) {
 			var row = document.createElement('tr');
-			
+            
 			var species = '<a href="#species" class="gotoSpecies" title="'+ data[i].comName + ' (' + data[i].sciName + ')' + '" target="_self">' + data[i].comName + '</a>';
 			var obsDt = '<a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a>';
 			var howMany = data[i].howMany || 'X'; //ternary operator.
-            var locName = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
             var userName = data[i].userDisplayName;
+            var locName = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
+            
+            console.log(data[i].comName + ', ' + data[i].subID + ', ' + data[i].obsDt + ', ' + data[i].userDisplayName + ', ' + locName);
+            
+            // Show same location and date-time of a notable species as a row with first reporter.
+            //if (prevLocationDateTime != (data[i].locName + data[i].obsDt)) {
+            if (prevSubId != data[i].subID) {
+                //console.log("Submitted " + data[i].obsDt + " by " + data[i].userDisplayName);
 
-			row = $.buildTableCell(species, row);
-			row = $.buildTableCell(locName, row);
-            row = $.buildTableCell(obsDt, row);
-			row = $.buildTableCell(howMany, row);
-            row = $.buildTableCell(userName, row);
+                var submitted = 'Submitted <a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a> by ' + data[i].userDisplayName;
+                var submitRow = document.createElement('tr');
+                var cell = document.createElement('td');
+                cell.setAttribute("colspan", "3");
+                cell.setAttribute("class", "header");
+                cell.innerHTML = submitted;
+                submitRow.appendChild(cell);
+                tbody.appendChild(submitRow);
+                /*row = $.buildTableCell(species, row);
+                row = $.buildTableCell(locName, row);
+                row = $.buildTableCell(howMany, row);*/
+                //prevLocationDateTime = data[i].locName + data[i].obsDt;
+                prevSubId = data[i].subID;
+            }
+            //if (prevSpeciesName == "" || prevSpeciesName != data[i].comName) {
+            if (prevSubId == data[i].subID) {
+                //observers += data[i].userDisplayName + " ";
+                //console.log("observers: " + observers);
+                row = $.buildTableCell(species, row);
+                row = $.buildTableCell(locName, row);
+                row = $.buildTableCell(howMany, row);
+                //prevSpeciesName = data[i].comName;
+            }
 
 			tbody.appendChild(row);
 		}
@@ -265,7 +294,7 @@ jQuery.extend({
 	getLocationTable: function(data) {
 		var table = $.buildTableHeaders("locationTable", "tablesorter", "Species", "Count", "", "", "");
 		var tbody = document.createElement('tbody');
-        var previousDate = ""; //data[0].obsDt;
+        var previousDate = "";
 
 		for (var i = 0; i < data.length; i++) {
 			var row = document.createElement('tr');
