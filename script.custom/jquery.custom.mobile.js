@@ -252,13 +252,10 @@ jQuery.extend({
             var userName = data[i].userDisplayName;
             var locName = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
             
-            console.log(data[i].comName + ', ' + data[i].subID + ', ' + data[i].obsDt + ', ' + data[i].userDisplayName + ', ' + locName);
+            //console.log(data[i].comName + ', ' + data[i].subID + ', ' + data[i].obsDt + ', ' + data[i].userDisplayName + ', ' + locName);
             
-            // Show same location and date-time of a notable species as a row with first reporter.
-            //if (prevLocationDateTime != (data[i].locName + data[i].obsDt)) {
+            // Show different checklists as a row.
             if (prevSubId != data[i].subID) {
-                //console.log("Submitted " + data[i].obsDt + " by " + data[i].userDisplayName);
-
                 var submitted = 'Submitted <a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a> by ' + data[i].userDisplayName;
                 var submitRow = document.createElement('tr');
                 var cell = document.createElement('td');
@@ -267,20 +264,12 @@ jQuery.extend({
                 cell.innerHTML = submitted;
                 submitRow.appendChild(cell);
                 tbody.appendChild(submitRow);
-                /*row = $.buildTableCell(species, row);
-                row = $.buildTableCell(locName, row);
-                row = $.buildTableCell(howMany, row);*/
-                //prevLocationDateTime = data[i].locName + data[i].obsDt;
                 prevSubId = data[i].subID;
             }
-            //if (prevSpeciesName == "" || prevSpeciesName != data[i].comName) {
             if (prevSubId == data[i].subID) {
-                //observers += data[i].userDisplayName + " ";
-                //console.log("observers: " + observers);
                 row = $.buildTableCell(species, row);
                 row = $.buildTableCell(locName, row);
                 row = $.buildTableCell(howMany, row);
-                //prevSpeciesName = data[i].comName;
             }
 
 			tbody.appendChild(row);
