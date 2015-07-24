@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>my outdoors links</title>
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <!-- jQM -->
+    <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <!-- end jQM -->
+	<script src="script.custom/jquery-dateFormat.min.js"></script>
+    <script>
+        (function( $ ) {
+            $(function() { // On document ready
+                $(document).on("ajaxSend", function() {
+                    var $this = $( this ),
+                        theme = $this.jqmData( "theme" ) || $.mobile.loader.prototype.options.theme,
+                        msgText = $this.jqmData( "msgtext" ) || $.mobile.loader.prototype.options.text,
+                        textVisible = $this.jqmData( "textvisible" ) || $.mobile.loader.prototype.options.textVisible,
+                        textonly = !!$this.jqmData( "textonly" );
+                        html = $this.jqmData( "html" ) || "";
+                    $.mobile.loading( "show", {
+                            text: "loading",
+                            textVisible: true,
+                            theme: theme,
+                            textonly: textonly,
+                            html: html
+                    });
+                })
+                .on("ajaxStop", function() {
+                    $.mobile.loading( "hide" );
+                });
+            });
+            
+            // Call eBird for last checklist date and add after location name.
+            $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
+                var ebird = "http://ebird.org/ws1.1/data/obs/hotspot/recent?fmt=json&back=30&maxResults=1&r=";
+                
+                $('a[href*="/hotspot/"]').each(function(index) {
+                    var visited = "";
+                    var url = $(this).attr("href");
+                    var hotspot = url.substr(url.lastIndexOf('/')+1);
+                    
+                    $.ajax({
+                        url: ebird + hotspot,
+                        type: 'get',
+                        dataType: 'json',
+                        async: false,
+                        success: function(data) {
+                            if (data.length > 0) {
+                                visited += '<p>' + $.format.date(data[0].obsDt, "ddd, dd-MMM-yyyy") + '</p>';
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            alert(error);
+                        }
+                    });
+
+                    $(this).append(visited);
+                });
+            });
+
+            $(document).pagecontainer({ beforeshow: function(event, ui) { } });
+            // Load results data.
+            $(document).on("pagecontainerbeforeshow", function(event, ui){
+                //console.log("pagecontainerbeforeshow: " + toPage);
+            });
+       })( jQuery );
+    </script>
+    <style>
+        .centerbox { margin: 0 auto; text-align: center; }
+        h2 { padding-left: 10px; }
+    </style>
+</head>
+<body>
+    <!-- Home -->
+    <div data-role="page" id="home" data-title="my outdoors links">
+        <div data-role="header" class="centerbox" data-id="site-header"><p>my outdoors links</p></div>
+        <div role="main" class="iu-content">
+            <h2>Hotspots</h2>
+            <ul data-role="listview">
+                <li><a href="http://ebird.org/ebird/hotspot/L209928" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Boston Public Garden, MA USA</a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L897808" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>McLaughlin Woods, MA USA</a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L207391" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Mt. Auburn Cemetery, MA USA</a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L1249718" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Olmsted Park, MA USA</a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L248222" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Olmsted Park--Leverett Pond, MA USA</a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L359383" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Olmsted Park--Ward's Pond, MA USA</a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L3609670" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Olmsted Park--Willow Pond, MA USA</a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L939078" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Titchwell Marsh RSPB Reserve, Norfolk UK</a></li>
+            </ul>
+            <h2>Sightings</h2>
+            <ul data-role="listview">
+                <li><a href="http://birding.aba.org/mobiledigest/MASS" target="_blank"><img src="https://pbs.twimg.com/profile_images/552126252660686848/XGu4Bto5_400x400.jpeg"><br>ABA Birding News, MA</a></li>
+                <li><a href="http://ebird.org/ebird/places" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>eBird: Explore Places</a></li>
+            </ul>
+        </div>
+        <div id="datepicker"></div>
+        <div data-role="footer" class="centerbox"><p class="copyright">&copy 2015 M Hunt.</p></div>
+    </div>
+</body>
+</html>
