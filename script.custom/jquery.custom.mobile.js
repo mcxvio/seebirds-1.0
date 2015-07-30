@@ -8,6 +8,29 @@ jQuery.fn.extend({
 });
 
 jQuery.extend({
+	spinner: function() {
+		$(document).on("ajaxSend", function() {
+			var $this = $( this ),
+				theme = $this.jqmData( "theme" ) || $.mobile.loader.prototype.options.theme,
+				msgText = $this.jqmData( "msgtext" ) || $.mobile.loader.prototype.options.text,
+				textVisible = $this.jqmData( "textvisible" ) || $.mobile.loader.prototype.options.textVisible,
+				textonly = !!$this.jqmData( "textonly" );
+				html = $this.jqmData( "html" ) || "";
+			$.mobile.loading( "show", {
+					text: "loading",
+					textVisible: true,
+					theme: theme,
+					textonly: textonly,
+					html: html
+			});
+		})
+		.on("ajaxStop", function() {
+			$.mobile.loading( "hide" );
+		});
+	}
+})
+
+jQuery.extend({
 	//http://stackoverflow.com/questions/905298/jquery-storing-ajax-response-into-global-variable
 	getValues: function(url, dataType) {
 		var result = null;
@@ -28,6 +51,39 @@ jQuery.extend({
 });
 
 jQuery.extend({
+	populateAutocompletes: function(page, url, file) {
+		var xml = $.getValues(url + file, "xml");
+		var filteredList = $(xml).filterNode("region");
+		
+		var tags = (page == "checklists") ? "#autocomplete-items-checklists" : "#autocomplete-items-notables";
+		var href = (page == "checklists") ? "#submissions" : "#sightings";
+		
+	    $(tags).on("filterablebeforefilter", function (e, data) {
+	        var $ul = $(this),
+	            $input = $(data.input),
+	            value = $input.val(),
+	            html = "";
+	        $ul.html("");
+
+	        if (value && value.length > 1) {
+	            $ul.html("<li><div class='ui-loader'><span class='ui-icon ui-icon-loading'></span></div></li>");
+	            $ul.listview("refresh");
+
+				var val;
+				$(filteredList).each(function () {
+					val = $(this).filterNode("name").text() + " (" + ($(this).filterNode("subnational2-code").text() || $(this).filterNode("subnational1-code").text()) + ")"
+					html += "<li><a href='" + href + "' class='gotoRegion'>" + val + "</a></li>";
+				});
+				
+				$ul.html(html);
+				$ul.listview("refresh");
+				$ul.trigger("updatelayout");
+			}
+		});
+	}
+});
+
+jQuery.extend({
 	getAutocompleteNameTags: function(url) {
 		// Retrieve raw XML data for autocomplete.
 		var xml = $.getValues(url, "xml");
@@ -43,14 +99,53 @@ jQuery.extend({
 });
 
 jQuery.extend({
+    getTableData: function(resultsToGet, regionToGet, region, search, locId, sciName) {
+        var htmlTable = "";
+		var ebirdData = "";
+        
+        if (search == "location") {
+            var url = $.geteBirdApiUrl(locId, "location");
+            ebirdData = $.getValues(url, "json");
+            
+            if (ebirdData.length > 0) {
+                htmlTable = $.getLocationTable(ebirdData);
+            }
+        } 
+        else if (search == "species") {
+            var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
+            ebirdData = $.getValues(url, "json");
+            
+            if (ebirdData.length > 0) {
+                htmlTable = $.getSpeciesTable(ebirdData, region);
+            }
+        } else {
+            ebirdData = $.getData(resultsToGet, regionToGet, region, search);
+            
+            if (ebirdData.length > 0) {
+                if (search == "checklists") {
+                    htmlTable = $.getChecklistsTable(ebirdData, region);
+                }
+                if (search == "notables") {
+                    htmlTable = $.getNotablesTable(ebirdData, region);
+                }
+            }
+        }
+
+		// http://stackoverflow.com/questions/3175687/how-best-to-implement-out-params-in-javascript
+        return (htmlTable.rows.length > 0) ? { table: htmlTable, data: ebirdData.length } : "";
+    }
+});
+
+jQuery.extend({
     getData: function(resultsToGet, regionToGet, region, search) {
         var data = "";
         var storedData = sessionStorage.getItem(resultsToGet);
         var storedRegion = sessionStorage.getItem(regionToGet);
         
+		console.log('storedData__' + storedData + '__');
         // Stored data present is for selected region.
         if ((storedData != null && storedRegion != null) && storedRegion == region) {
-            console.log('session data...');
+            console.log('session data... ' + storedData + ' ...');
             data = JSON.parse(storedData);
         } else { // No stored data, or region has changed.
             console.log('ebird data...');
@@ -119,6 +214,22 @@ jQuery.extend({
 });
 
 jQuery.extend({
+	populateIdentifySpecies: function(selectedData) {
+		/*Start species session management*/
+		if (selectedData.comName == "") {
+			// Populate from session, passed back from identify page.
+			console.log("get data FROM identify page");
+			selectedData = JSON.parse(sessionStorage.getItem("identification"));
+		} else {
+			console.log("store data FOR identify page: " + JSON.stringify(selectedData));
+			sessionStorage.setItem("identification", JSON.stringify(selectedData));
+		}
+		/*End species session management*/
+		return selectedData;
+	}
+});
+
+jQuery.extend({
 	getSubRegionFromSelection: function(selection) {
 		//http://stackoverflow.com/questions/17779744/regular-expression-to-get-a-string-between-parentheses-in-javascript		
 		var regExp = /\(([^)]+)\)/;
@@ -159,7 +270,6 @@ jQuery.extend({
 
         if (heading3 != "") {
             var th3 = document.createElement('th');
-
             /*if (heading5 != "Observer") {
                 th3.setAttribute("data-priority", "1");
             }*/
@@ -198,7 +308,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getChecklistsTable: function(data, selection) {
-		var table = $.buildTableHeaders("submissionsTable", "tablesorter", "Hotspot", "Date", "No. Species", "", "");
+		var table = $.buildTableHeaders("submissionsTable", "tablesorter", "Hotspot", "Date", "Count*", "", "");
 		var tbody = document.createElement('tbody');		
 		
 		var speciesCount = 0;
@@ -258,7 +368,7 @@ jQuery.extend({
             if (prevSubId != data[i].subID) {
                 var submitted = 'Submitted <a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a> by ' + data[i].userDisplayName;
                 var submitRow = document.createElement('tr');
-                var cell = document.createElement('td');
+                var cell = document.createElement('th');
                 cell.setAttribute("colspan", "3");
                 cell.setAttribute("class", "header");
                 cell.innerHTML = submitted;
@@ -296,7 +406,7 @@ jQuery.extend({
             if (previousDate != data[i].obsDt) {
                 obsDt = 'Submitted <a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a> by ' + data[i].userDisplayName;
                 var dateRow = document.createElement('tr');
-                var cell = document.createElement('td');
+                var cell = document.createElement('th');
                 cell.setAttribute("colspan", "2");
                 cell.setAttribute("class", "header");
                 cell.innerHTML = obsDt;

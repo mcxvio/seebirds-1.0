@@ -17,31 +17,11 @@
         //var urlBase = "http://huntsebirds.appspot.com/";
         var urlBase = "http://localhost:8080/mebird/";
         var dataFile = "ebird_api_ref_list_test.xml";
-        var noSpeciesDataFound = "No species sightings found.";
-        var noLocationDataFound = "No location sightings found.";
-        var noNotableDataFound = "No notable sightings found.";
-        var noSubmissionsDataFound = "No checklist submissions found.";
+		var noDataFound = "No data found, please search again.";
 
         (function( $ ) {
             $(function() { // On document ready
-                $(document).on("ajaxSend", function() {
-                    var $this = $( this ),
-                        theme = $this.jqmData( "theme" ) || $.mobile.loader.prototype.options.theme,
-                        msgText = $this.jqmData( "msgtext" ) || $.mobile.loader.prototype.options.text,
-                        textVisible = $this.jqmData( "textvisible" ) || $.mobile.loader.prototype.options.textVisible,
-                        textonly = !!$this.jqmData( "textonly" );
-                        html = $this.jqmData( "html" ) || "";
-                    $.mobile.loading( "show", {
-                            text: "loading",
-                            textVisible: true,
-                            theme: theme,
-                            textonly: textonly,
-                            html: html
-                    });
-                })
-                .on("ajaxStop", function() {
-                    $.mobile.loading( "hide" );
-                });
+				$.spinner();
             });
             
             var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" }
@@ -49,39 +29,9 @@
             // Load autocomplete values & handle selection.
             $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
                 var page = $(this).attr("id");
-                
-                console.log("pagecreate: "+page);
-                
                 if (page == "checklists" || page == "notables") {
-                    var xml = $.getValues(urlBase + dataFile, "xml");
-                    var filteredList = $(xml).filterNode("region");
-                    
-                    var tags = (page == "checklists") ? "#autocomplete-items-checklists" : "#autocomplete-items-notables";
-                    var href = (page == "checklists") ? "#submissions" : "#sightings";
-                    
-                    $(tags).on("filterablebeforefilter", function ( e, data ) {
-                        var $ul = $( this ),
-                            $input = $( data.input ),
-                            value = $input.val(),
-                            html = "";
-                        $ul.html( "" );
-                
-                        if (value && value.length > 1) {
-                            $ul.html( "<li><div class='ui-loader'><span class='ui-icon ui-icon-loading'></span></div></li>" );
-                            $ul.listview( "refresh" );
-                
-                            var val;
-                            $(filteredList).each(function () {
-                                val = $(this).filterNode("name").text() + " (" + ($(this).filterNode("subnational2-code").text() || $(this).filterNode("subnational1-code").text()) + ")"
-                                html += "<li><a href='" + href + "' class='gotoRegion'>" + val + "</a></li>";
-                            });
-                            
-                            $ul.html( html );
-                            $ul.listview("refresh");
-                            $ul.trigger("updatelayout");
-                        }
-                    });
-                }
+					$.populateAutocompletes(page, urlBase, dataFile);
+				}
             });
 
             // Save selected region from autocomplete.
@@ -93,104 +43,57 @@
             // Load results data.
             $(document).on("pagecontainerbeforeshow", function(event, ui){
                 var toPage = ui.toPage[0].id;
-                var prevPage = ui.prevPage.attr('id');
-                var table = "";
-                var message = "";
-                var tableName = "";
-                var data = "";
-                var page = "";
-                
+                var page = "#" + toPage;
+                var message = noDataFound;
+                var tableData = "";
+               
                 console.log("pagecontainerbeforeshow: " + toPage);
-                
-                if (toPage == "submissions") {
-                    page = "#submissions";
-                    var region = selectedData.region;
-                    if (region.length > 0) {
-                        tableName = "#submissionsTable";
-                        //console.log('get checklists: ' + prevPage + ", " + selectedData.startPage);
-                        data = $.getData("checklistsResults", "checklistsRegion", region, "checklists");
 
-                        if (data.length > 0) {
-                            table = $.getChecklistsTable(data, region);
-                            message = "Checklists with number of species seen most recently in " + region + ", in last 5 days: " + (table.rows.length-1) + ".";
-                        } else {
-                            message = noSubmissionsDataFound;
+                if (toPage == "submissions") {
+                    if (selectedData.region.length > 0) {
+                        tableData = $.getTableData("checklistsResults", "checklistsRegion", selectedData.region, "checklists", "", "");
+                        
+                        if (tableData.table.rows.length > 0) {
+                            message = "Checklists with *count of species seen most recently in " + selectedData.region + ", in last 5 days: " + (tableData.table.rows.length-1) + ".";
                         }
                     } else {
-                        $(page + " #message").html("<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.");
+                        message = "<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
                     }
                 }
                 if (toPage == "sightings") {
-                    page = "#sightings";
-                    var region = selectedData.region;
-                    if (region.length > 0) {
-                        tableName = "#sightingsTable";
-                        //console.log('getData: ' + prevPage + ", " + selectedData.startPage);
-                        data = $.getData("notablesResults", "notablesRegion", region, "notables");
-                        if (data.length > 0) {
-                            table = $.getNotablesTable(data, region);
-                            message = "Notable species for " + region + ", in last 5 days: " + data.length + ".";
-                        } else {
-                            message = noNotableDataFound;
+                    if (selectedData.region.length > 0) {
+                        tableData = $.getTableData("notablesResults", "notablesRegion", selectedData.region, "notables", "", "");
+                        
+                        if (tableData.table.rows.length > 0) {
+                            message = "Notable species for " + selectedData.region + ", in last 5 days: " + tableData.data + ".";
                         }
                     } else {
-                        $(page + " #message").html("<a href='#nav-panel-notable-sightings'>Select</a> from Checklists or Notables to search State or County sightings.");
+                        message = "<a href='#nav-panel-notable-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
                     }
                 }
                 if (toPage == "location") {
-                    page = "#location";
-                    var locId = selectedData.locId;
-                    var locName = selectedData.locName;
-                    var region = selectedData.region;
-                    
-                    var url = $.geteBirdApiUrl(locId, "location");
-                    var data = $.getValues(url, "json");
-                    
-                    if (data.length > 0) {
-                        table = $.getLocationTable(data);
-                        message = 'Sightings at <a href="http://ebird.org/ebird/hotspot/' + locId + '" target="_blank">' + locName + '</a> in last 14 days: ' + data.length + '.';
-                    } else {
-                        message = noLocationDataFound;
+                    tableData = $.getTableData("", "", "", "location", selectedData.locId);
+                    if (tableData.table.rows.length > 0) {
+                        message = 'Sightings at <a href="http://ebird.org/ebird/hotspot/' + selectedData.locId + '" target="_blank">' + selectedData.locName + '</a> in last 14 days: ' + tableData.data + '.';
                     }
                 }
                 if (toPage == "species") {
-                    page = "#species";
-
-                    console.log("selectedData: " + JSON.stringify(selectedData));
-                    console.log("sessionStorage: " + JSON.stringify(sessionStorage.getItem("identification")));
-                    
-                    if (selectedData.comName == "") {
-                        // Populate from session, passed back from identify page.
-                        console.log("get data FROM identify page");
-                        selectedData = JSON.parse(sessionStorage.getItem("identification"));
-                    } else {
-                        console.log("store data FOR identify page: " + JSON.stringify(selectedData));
-                        sessionStorage.setItem("identification", JSON.stringify(selectedData));
-                    }
-
-                    var sciName = selectedData.sciName;
-                    var comName = selectedData.comName;
-                    var region = selectedData.region;
-
-                    if (sciName != "") {
-                        var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
-                        var data = $.getValues(url, "json");
-                        
-                        if (data.length > 0) {
-                            table = $.getSpeciesTable(data, region);
-                            message = 'Sightings of <a href="identify.html" rel="external" data-ajax="false">' + comName + '</a> in ' + region + ' in last 14 days: ' + data.length + '.';
-                        } else {
-                             message = noSpeciesDataFound;
+                    console.log("selectedData,1: " + JSON.stringify(selectedData));
+					selectedData = $.populateIdentifySpecies(selectedData);
+                    console.log("selectedData,2: " + JSON.stringify(selectedData));
+					
+                    if (selectedData.sciName != "") {
+                        tableData = $.getTableData("", "", selectedData.region, "species", "", selectedData.sciName);
+                        if (tableData.table.rows.length > 0) {
+                            message = 'Sightings of <a href="identify.html" rel="external" data-ajax="false">' + selectedData.comName + '</a> in ' + selectedData.region + ' in last 14 days: ' + tableData.data + '.';
                         }
-                    } else {
-                         message = noSpeciesDataFound;
                     }
                 }
-                if (table != "" && table.rows.length > 1) {
+                if (tableData != "" && tableData.table.rows.length > 1) {
                     $(page + " #message").html(message);
-                    $(page + " #results").html(table);
-                    //$(tableName).tablesorter();
-                    //$(tableName).table();
+                    $(page + " #results").html(tableData.table);
+                    //$(page + "Table").tablesorter(); //sorting, table name page plus 'Table'.
+                    //$(page + "Table").table(); //show/hide columns, table name page plus 'Table'.
                 } else if (message != "") {
                     $(page + " #message").html(message);
                     $(page + " #results").html("");
@@ -199,10 +102,8 @@
 
             // Load location data.
             $(document).on("click", "a.gotoLocation", function() {
-                var locId = $(this).attr('title');
-                var locName = $(this).text();
-                selectedData.locId = locId;
-                selectedData.locName = locName;
+                selectedData.locId = $(this).attr('title');
+                selectedData.locName = $(this).text();
             });
         
             // Load species data.

@@ -10,6 +10,12 @@
 		border: 1px solid #FFF;
 		padding: 4px;
 	}
+	table.tablesorter tbody tr th {
+		background-color: #f4f4f4 /*#e6EEEE*/;
+		border: 1px solid #FFF;
+		padding: 4px;
+		font-weight: normal;
+	}
 	table.tablesorter thead tr .header {
 		background-image: url(bg.gif);
 		background-repeat: no-repeat;
