@@ -104,7 +104,7 @@ jQuery.extend({
 		var ebirdData = "";
         
         if (search == "location") {
-            var url = $.geteBirdApiUrl(locId, "location");
+            var url = $.geteBirdApiUrl(locId, "location", "");
             ebirdData = $.getValues(url, "json");
             
             if (ebirdData.length > 0) {
@@ -112,7 +112,7 @@ jQuery.extend({
             }
         } 
         else if (search == "species") {
-            var url = $.geteBirdSpeciesApiUrl(sciName, region, "species");
+            var url = $.geteBirdApiUrl(region, "species", sciName);
             ebirdData = $.getValues(url, "json");
             
             if (ebirdData.length > 0) {
@@ -149,7 +149,7 @@ jQuery.extend({
             data = JSON.parse(storedData);
         } else { // No stored data, or region has changed.
             console.log('ebird data...');
-            var url = $.geteBirdApiUrl(region, search);
+            var url = $.geteBirdApiUrl(region, search, "");
             data = $.getValues(url, "json");
             
             storedData = JSON.stringify(data);
@@ -163,50 +163,38 @@ jQuery.extend({
 });
 
 jQuery.extend({
-	geteBirdApiUrl: function(selection, api) {
+	geteBirdApiUrl: function(selection, api, sciName) {
 		var url = "";
 		
 		if (api == "location") {
 			url = "http://ebird.org/ws1.1/data/obs/hotspot/recent?r=" + selection + "&detail=full&includeProvisional=true&back=14&fmt=json"
 		} else {
 			var subregion = $.getSubRegionFromSelection(selection);
-			
-			rtype = "subnational1";
-			if (subregion.length == 3) {
-				rtype = "country";
-				subregion = subregion.substring(0,2); //i.e., "US-" to "US"
-			} else {
-				if (subregion.match(/-/gi).length == 2) {
-					rtype = "subnational2";
-				}
-			}
-			
-			if (api == "notables") {
-				url = "http://ebird.org/ws1.1/data/notable/region/recent?rtype=" + rtype + "&r=" + subregion + "&detail=full&hotspot=true&back=5&fmt=json";
-			} else if (api == "checklists") {
-				url = "http://ebird.org/ws1.1/data/obs/region/recent?rtype=" + rtype + "&r=" + subregion + "&hotspot=true&includeProvisional=true&back=5&fmt=json";
-			}
-		}
-		
-		return url;
-	}
-});
-
-jQuery.extend({
-	geteBirdSpeciesApiUrl: function(sciName, region, api) {
-		var url = "";
-		
-		if (api == "species") {
-			var subregion = $.getSubRegionFromSelection(region);
-			
-			var rtype = "subnational2";
 			var regex = /-/gi;
 			
-			if (subregion.match(regex).length == 1) {
+			if (api == "species") {
+				var rtype = "subnational2";
+				if (subregion.match(regex).length == 1) {
+					rtype = "subnational1";
+				}
+				url = "http://ebird.org/ws1.1/data/obs/region_spp/recent?rtype=" + rtype + "&r=" + subregion + "&sci=" + sciName + "&hotspot=true&includeProvisional=true&back=14&fmt=json";
+			} else {
 				rtype = "subnational1";
+				if (subregion.length == 3) {
+					rtype = "country";
+					subregion = subregion.substring(0,2); //i.e., "US-" to "US"
+				} else {
+					if (subregion.match(regex).length == 2) {
+						rtype = "subnational2";
+					}
+				}
+				
+				if (api == "notables") {
+					url = "http://ebird.org/ws1.1/data/notable/region/recent?rtype=" + rtype + "&r=" + subregion + "&detail=full&hotspot=true&back=5&fmt=json";
+				} else if (api == "checklists") {
+					url = "http://ebird.org/ws1.1/data/obs/region/recent?rtype=" + rtype + "&r=" + subregion + "&hotspot=true&includeProvisional=true&back=5&fmt=json";
+				}
 			}
-			
-			url = "http://ebird.org/ws1.1/data/obs/region_spp/recent?rtype=" + rtype + "&r=" + subregion + "&sci=" + sciName + "&hotspot=true&includeProvisional=true&back=14&fmt=json";
 		}
 		
 		return url;
