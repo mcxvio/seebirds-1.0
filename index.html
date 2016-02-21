@@ -15,31 +15,31 @@
     <link rel="stylesheet" type="text/css" href="style.custom/styles.custom.css">
     <script>
         //var urlBase = "http://huntsebirds.appspot.com/";
-        var urlBase = "http://localhost:8080/mebird/";
-		//var dataFile = "ebird_api_ref_list_usa_uk.xml";
+        var urlBase = "http://localhost:8080/";
+        //var dataFile = "ebird_api_ref_list_usa_uk.xml";
         var dataFile = "ebird_api_ref_list_test.xml";
-		var noDataFound = "No data found, please search again.";
+        var noDataFound = "No data found, please search again.";
 
         (function( $ ) {
             $(function() { // On document ready
-				$.spinner();
+                $.spinner();
             });
-            
+
             var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" }
 
             // Load autocomplete values & handle selection.
             $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
                 var page = $(this).attr("id");
                 if (page == "checklists" || page == "notables") {
-					$.populateAutocompletes(page, urlBase, dataFile);
-				}
+                    $.populateAutocompletes(page, urlBase, dataFile);
+                }
             });
 
             // Save selected region from autocomplete.
             $(document).on("click", "a.gotoRegion", function() {
                 selectedData.region = $(this).text();
             });
-            
+
             $(document).pagecontainer({ beforeshow: function(event, ui) { } });
             // Load results data.
             $(document).on("pagecontainerbeforeshow", function(event, ui){
@@ -47,13 +47,13 @@
                 var page = "#" + toPage;
                 var message = noDataFound;
                 var tableData = "";
-               
+
                 console.log("pagecontainerbeforeshow: " + toPage);
 
                 if (toPage == "submissions") {
                     if (selectedData.region.length > 0) {
                         tableData = $.getTableData("checklistsResults", "checklistsRegion", selectedData.region, "checklists", "", "");
-                        
+
                         if (tableData.table.rows.length > 0) {
                             message = "Checklists with *count of species seen most recently in " + selectedData.region + ", in last 5 days: " + (tableData.table.rows.length-1) + ".";
                         }
@@ -64,7 +64,7 @@
                 if (toPage == "sightings") {
                     if (selectedData.region.length > 0) {
                         tableData = $.getTableData("notablesResults", "notablesRegion", selectedData.region, "notables", "", "");
-                        
+
                         if (tableData.table.rows.length > 0) {
                             message = "Notable species for " + selectedData.region + ", in last 5 days: " + tableData.data + ".";
                         }
@@ -80,9 +80,9 @@
                 }
                 if (toPage == "species") {
                     console.log("selectedData,1: " + JSON.stringify(selectedData));
-					selectedData = $.populateIdentifySpecies(selectedData);
+                    selectedData = $.populateIdentifySpecies(selectedData);
                     console.log("selectedData,2: " + JSON.stringify(selectedData));
-					
+
                     if (selectedData.sciName != "") {
                         tableData = $.getTableData("", "", selectedData.region, "species", "", selectedData.sciName);
                         if (tableData.table.rows.length > 0) {
@@ -106,7 +106,7 @@
                 selectedData.locId = $(this).attr('title');
                 selectedData.locName = $(this).text();
             });
-        
+
             // Load species data.
             $(document).on("click", "a.gotoSpecies", function() {
                 var title = $(this).attr('title');
@@ -270,7 +270,7 @@
             <p class="copyright">&copy 2016 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
         </div>
     </div>
-    <!-- Donate -> separate page -->
-    <!-- Providers -> separate page -->
+    <!-- Donate -> todo separate page -->
+    <!-- Providers -> todo separate page -->
 </body>
 </html>
