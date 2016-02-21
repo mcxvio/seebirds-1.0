@@ -42,8 +42,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 *.bak
-*.yaml
-main.py
 dunlin_extract.html
 wikipedia_image_example.txt
 columns.txt
