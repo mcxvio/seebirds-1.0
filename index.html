@@ -8,6 +8,7 @@
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="script.tablesorter/jquery.tablesorter.min.js"></script>
     <script src="script.custom/jquery.custom.mobile.js"></script>
+    <script src="script.custom/jquery.formatDateTime.min.js"></script>
     <!-- jQM -->
     <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
@@ -15,9 +16,8 @@
     <link rel="stylesheet" type="text/css" href="style.custom/styles.custom.css">
     <script>
         //var urlBase = "http://huntsebirds.appspot.com/";
-        var urlBase = "http://localhost:8080/";
-        //var dataFile = "ebird_api_ref_list_usa_uk.xml";
-        var dataFile = "ebird_api_ref_list_test.xml";
+        var urlBase = "https://mebird-mrhapi.c9users.io/";
+        var dataFile = "data/region_usa_ma.xml";
         var noDataFound = "No data found, please search again.";
 
         (function( $ ) {
@@ -25,14 +25,22 @@
                 $.spinner();
             });
 
-            var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" }
+            /**
+                $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+                                options.async = true;             *
+                });
+             */
 
+            var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" };
+            
             // Load autocomplete values & handle selection.
             $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
                 var page = $(this).attr("id");
                 if (page == "checklists" || page == "notables") {
                     $.populateAutocompletes(page, urlBase, dataFile);
                 }
+                // Set current copyright year.
+                $(".copyrightYear").html($.getCurrentYear());
             });
 
             // Save selected region from autocomplete.
@@ -129,7 +137,7 @@
             <li><a id="gotoNotables" href="#notables">notables</a></li></ul>
         </div>
         <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy 2016 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
+            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
         </div>
     </div>
     <!-- Checklists Search -->
@@ -152,7 +160,7 @@
             </div>
         </div>
         <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy 2016 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
+            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
         </div>
     </div>
     <!-- Checklists Submissions Results -->
@@ -175,7 +183,7 @@
             </div>
         </div>
         <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy 2016 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
+            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
         </div>
     </div>
     <!-- Notables Search -->
@@ -198,7 +206,7 @@
             </div>
         </div>
         <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy 2016 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
+            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
         </div>
     </div>
     <!-- Notable Sightings Results -->
@@ -221,7 +229,7 @@
             </div>
         </div>
         <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy 2016 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
+            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
         </div>
     </div>
     <!-- Location Results -->
@@ -244,7 +252,7 @@
             </div>
         </div>
         <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy 2016 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
+            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
         </div>
     </div>
     <!-- Species Results -->
@@ -267,7 +275,7 @@
             </div>
         </div>
         <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy 2016 M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
+            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
         </div>
     </div>
     <!-- Donate -> todo separate page -->

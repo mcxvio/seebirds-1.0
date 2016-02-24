@@ -8,6 +8,12 @@ jQuery.fn.extend({
 });
 
 jQuery.extend({
+	getCurrentYear: function() {
+		return new Date().getFullYear();
+	}
+})
+
+jQuery.extend({
 	spinner: function() {
 		$(document).on("ajaxSend", function() {
 			var $this = $( this ),
@@ -142,9 +148,10 @@ jQuery.extend({
         var storedData = sessionStorage.getItem(resultsToGet);
         var storedRegion = sessionStorage.getItem(regionToGet);
         
-		console.log('storedData__' + storedData + '__');
+		console.log('storedData__' + storedData + '__' + storedRegion);
         // Stored data present is for selected region.
-        if ((storedData != null && storedRegion != null) && storedRegion == region) {
+        if ((storedData != null && storedData != "null") &&
+        	(storedRegion != null && storedRegion != "null") && storedRegion == region) {
             console.log('session data... ' + storedData + ' ...');
             data = JSON.parse(storedData);
         } else { // No stored data, or region has changed.
@@ -167,7 +174,7 @@ jQuery.extend({
 		var url = "";
 		
 		if (api == "location") {
-			url = "http://ebird.org/ws1.1/data/obs/hotspot/recent?r=" + selection + "&detail=full&includeProvisional=true&back=14&fmt=json"
+			url = "//ebird.org/ws1.1/data/obs/hotspot/recent?r=" + selection + "&detail=full&includeProvisional=true&back=14&fmt=json";
 		} else {
 			var subregion = $.getSubRegionFromSelection(selection);
 			var regex = /-/gi;
@@ -177,7 +184,7 @@ jQuery.extend({
 				if (subregion.match(regex).length == 1) {
 					rtype = "subnational1";
 				}
-				url = "http://ebird.org/ws1.1/data/obs/region_spp/recent?rtype=" + rtype + "&r=" + subregion + "&sci=" + sciName + "&hotspot=true&includeProvisional=true&back=14&fmt=json";
+				url = "//ebird.org/ws1.1/data/obs/region_spp/recent?rtype=" + rtype + "&r=" + subregion + "&sci=" + sciName + "&hotspot=true&includeProvisional=true&back=14&fmt=json";
 			} else {
 				rtype = "subnational1";
 				if (subregion.length == 3) {
@@ -190,9 +197,10 @@ jQuery.extend({
 				}
 				
 				if (api == "notables") {
-					url = "http://ebird.org/ws1.1/data/notable/region/recent?rtype=" + rtype + "&r=" + subregion + "&detail=full&hotspot=true&back=5&fmt=json";
+					url = "//ebird.org/ws1.1/data/notable/region/recent?rtype=" + rtype + "&r=" + subregion + "&detail=full&hotspot=true&back=5&fmt=json";
 				} else if (api == "checklists") {
-					url = "http://ebird.org/ws1.1/data/obs/region/recent?rtype=" + rtype + "&r=" + subregion + "&hotspot=true&includeProvisional=true&back=5&fmt=json";
+					url = "//ebird.org/ws1.1/data/obs/region/recent?rtype=" + rtype + "&r=" + subregion + "&hotspot=true&includeProvisional=true&back=5&fmt=json";
+					console.log(url);
 				}
 			}
 		}
@@ -312,7 +320,7 @@ jQuery.extend({
 
 				var locName = '<a href="#location" class="gotoLocation" title="' + data[i-1].locID + '" target="_self">' + data[i-1].locName + '</a>';
 				var howMany = speciesCount;
-				var obsDt = data[i-1].obsDt;
+				var obsDt = $.formatDateTime('dd-M hh:ii', new Date(data[i-1].obsDt));
 				
 				row = $.buildTableCell(locName, row);
 				row = $.buildTableCell(obsDt, row);
@@ -336,25 +344,25 @@ jQuery.extend({
 	getNotablesTable: function(data, selection) {
 		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species", "Hotspot", "Count", "", "");
 		var tbody = document.createElement('tbody');
-        var prevLocationDateTime = "";
-        var prevSpeciesName = "";
+        //var prevLocationDateTime = "";
+        //var prevSpeciesName = "";
         var prevSubId = "";
-        var observers = "";
+        //var observers = "";
 
 		for (var i = 0; i < data.length; i++) {
 			var row = document.createElement('tr');
             
 			var species = '<a href="#species" class="gotoSpecies" title="'+ data[i].comName + ' (' + data[i].sciName + ')' + '" target="_self">' + data[i].comName + '</a>';
-			var obsDt = '<a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a>';
+			//var obsDt = '<a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a>';
 			var howMany = data[i].howMany || 'X'; //ternary operator.
-            var userName = data[i].userDisplayName;
+            //var userName = data[i].userDisplayName;
             var locName = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
             
             //console.log(data[i].comName + ', ' + data[i].subID + ', ' + data[i].obsDt + ', ' + data[i].userDisplayName + ', ' + locName);
             
             // Show different checklists as a row.
             if (prevSubId != data[i].subID) {
-                var submitted = 'Submitted <a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a> by ' + data[i].userDisplayName;
+                var submitted = '<a href="https://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + $.formatDateTime('dd-M hh:ii', new Date(data[i].obsDt)) + '</a> by ' + data[i].userDisplayName;
                 var submitRow = document.createElement('tr');
                 var cell = document.createElement('th');
                 cell.setAttribute("colspan", "3");
@@ -392,7 +400,7 @@ jQuery.extend({
             
             // Show different visit dates as a row.
             if (previousDate != data[i].obsDt) {
-                obsDt = 'Submitted <a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a> by ' + data[i].userDisplayName;
+                obsDt = '<a href="https://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + $.formatDateTime('dd-M hh:ii', new Date(data[i].obsDt)) + '</a> by ' + data[i].userDisplayName;
                 var dateRow = document.createElement('tr');
                 var cell = document.createElement('th');
                 cell.setAttribute("colspan", "2");
@@ -423,7 +431,7 @@ jQuery.extend({
 
 			var location = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
 			var count = data[i].howMany || 'X';
-			var date = data[i].obsDt;
+			var date = $.formatDateTime('dd-M hh:ii', new Date(data[i].obsDt));
 
 			row = $.buildTableCell(location, row);
 			row = $.buildTableCell(date, row);
