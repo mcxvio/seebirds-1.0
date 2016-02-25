@@ -7,8 +7,8 @@
     <link rel="stylesheet" type="text/css" href="script.tablesorter/styles.tablesorter.css">
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="script.tablesorter/jquery.tablesorter.min.js"></script>
-    <script src="script.custom/jquery.custom.js"></script>
     <script src="script.custom/jquery.formatDateTime.min.js"></script>
+    <script src="script.custom/jquery.custom.js"></script>
     <!-- jQM -->
     <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
@@ -16,6 +16,7 @@
     <link rel="stylesheet" type="text/css" href="style.custom/styles.custom.css">
     <script>
         var urlBase = "http://huntsebirds.appspot.com/";
+        //var urlBase = "http://localhost:8080/";
         //var urlBase = "https://mebird-mrhapi.c9users.io/";
         var dataFile = "data/region_usa_ma.xml";
         var noDataFound = "No data found, please search again.";
@@ -26,7 +27,7 @@
             });
 
             var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" };
-            
+
             // Load autocomplete values & handle selection.
             $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
                 var page = $(this).attr("id");
@@ -50,7 +51,7 @@
                 var message = noDataFound;
                 var tableData = "";
 
-                console.log("pagecontainerbeforeshow: " + toPage);
+                //console.log("pagecontainerbeforeshow: " + toPage);
 
                 if (toPage == "submissions") {
                     if (selectedData.region.length > 0) {
@@ -81,9 +82,9 @@
                     }
                 }
                 if (toPage == "species") {
-                    console.log("selectedData,1: " + JSON.stringify(selectedData));
+                    //console.log("selectedData,1: " + JSON.stringify(selectedData));
                     selectedData = $.populateIdentifySpecies(selectedData);
-                    console.log("selectedData,2: " + JSON.stringify(selectedData));
+                    //console.log("selectedData,2: " + JSON.stringify(selectedData));
 
                     if (selectedData.sciName != "") {
                         tableData = $.getTableData("", "", selectedData.region, "species", "", selectedData.sciName);

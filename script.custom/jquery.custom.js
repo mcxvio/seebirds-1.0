@@ -1,4 +1,4 @@
-jQuery.fn.extend({		
+jQuery.fn.extend({
 	//http://www.steveworkman.com/html5-2/javascript/2011/improving-javascript-xml-node-finding-performance-by-2000/
 	filterNode: function(name) {
 		return this.find('*').filter(function() {
@@ -50,7 +50,7 @@ jQuery.extend({
 			},
 			error: function(xhr, status, error) {
 				alert(error);
-			} 
+			}
 		});
 		return result;
 	}
@@ -60,10 +60,10 @@ jQuery.extend({
 	populateAutocompletes: function(page, url, file) {
 		var xml = $.getValues(url + file, "xml");
 		var filteredList = $(xml).filterNode("region");
-		
+
 		var tags = (page == "checklists") ? "#autocomplete-items-checklists" : "#autocomplete-items-notables";
 		var href = (page == "checklists") ? "#submissions" : "#sightings";
-		
+
 	    $(tags).on("filterablebeforefilter", function (e, data) {
 	        var $ul = $(this),
 	            $input = $(data.input),
@@ -80,7 +80,7 @@ jQuery.extend({
 					val = $(this).filterNode("name").text() + " (" + ($(this).filterNode("subnational2-code").text() || $(this).filterNode("subnational1-code").text()) + ")"
 					html += "<li><a href='" + href + "' class='gotoRegion'>" + val + "</a></li>";
 				});
-				
+
 				$ul.html(html);
 				$ul.listview("refresh");
 				$ul.trigger("updatelayout");
@@ -95,7 +95,7 @@ jQuery.extend({
 		var xml = $.getValues(url, "xml");
 		var filteredList = $(xml).filterNode("region");
 		var tags = [];
-		
+
 		$(filteredList).each(function () {
 			tags.push($(this).filterNode("name").text() + " (" + ($(this).filterNode("subnational2-code").text() || $(this).filterNode("subnational1-code").text()) + ")");
 		});
@@ -108,25 +108,25 @@ jQuery.extend({
     getTableData: function(resultsToGet, regionToGet, region, search, locId, sciName) {
         var htmlTable = "";
 		var ebirdData = "";
-        
+
         if (search == "location") {
             var url = $.geteBirdApiUrl(locId, "location", "");
             ebirdData = $.getValues(url, "json");
-            
+
             if (ebirdData.length > 0) {
                 htmlTable = $.getLocationTable(ebirdData);
             }
-        } 
+        }
         else if (search == "species") {
             var url = $.geteBirdApiUrl(region, "species", sciName);
             ebirdData = $.getValues(url, "json");
-            
+
             if (ebirdData.length > 0) {
                 htmlTable = $.getSpeciesTable(ebirdData, region);
             }
         } else {
             ebirdData = $.getData(resultsToGet, regionToGet, region, search);
-            
+
             if (ebirdData.length > 0) {
                 if (search == "checklists") {
                     htmlTable = $.getChecklistsTable(ebirdData, region);
@@ -147,24 +147,24 @@ jQuery.extend({
         var data = "";
         var storedData = sessionStorage.getItem(resultsToGet);
         var storedRegion = sessionStorage.getItem(regionToGet);
-        
-		console.log('storedData__' + storedData + '__' + storedRegion);
+
+				//console.log('storedData__' + storedData + '__' + storedRegion);
         // Stored data present is for selected region.
         if ((storedData != null && storedData != "null") &&
         	(storedRegion != null && storedRegion != "null") && storedRegion == region) {
-            console.log('session data... ' + storedData + ' ...');
+            //console.log('session data... ' + storedData + ' ...');
             data = JSON.parse(storedData);
         } else { // No stored data, or region has changed.
-            console.log('ebird data...');
+            //console.log('ebird data...');
             var url = $.geteBirdApiUrl(region, search, "");
             data = $.getValues(url, "json");
-            
+
             storedData = JSON.stringify(data);
-            
+
             sessionStorage.setItem(resultsToGet, storedData);
             sessionStorage.setItem(regionToGet, region);
         }
-        
+
         return data;
     }
 });
@@ -172,13 +172,13 @@ jQuery.extend({
 jQuery.extend({
 	geteBirdApiUrl: function(selection, api, sciName) {
 		var url = "";
-		
+
 		if (api == "location") {
 			url = "//ebird.org/ws1.1/data/obs/hotspot/recent?r=" + selection + "&detail=full&includeProvisional=true&back=14&fmt=json";
 		} else {
 			var subregion = $.getSubRegionFromSelection(selection);
 			var regex = /-/gi;
-			
+
 			if (api == "species") {
 				var rtype = "subnational2";
 				if (subregion.match(regex).length == 1) {
@@ -195,16 +195,16 @@ jQuery.extend({
 						rtype = "subnational2";
 					}
 				}
-				
+
 				if (api == "notables") {
 					url = "//ebird.org/ws1.1/data/notable/region/recent?rtype=" + rtype + "&r=" + subregion + "&detail=full&hotspot=true&back=5&fmt=json";
 				} else if (api == "checklists") {
 					url = "//ebird.org/ws1.1/data/obs/region/recent?rtype=" + rtype + "&r=" + subregion + "&hotspot=true&includeProvisional=true&back=5&fmt=json";
-					console.log(url);
+					//console.log(url);
 				}
 			}
 		}
-		
+
 		return url;
 	}
 });
@@ -214,10 +214,10 @@ jQuery.extend({
 		/*Start species session management*/
 		if (selectedData.comName == "") {
 			// Populate from session, passed back from identify page.
-			console.log("get data FROM identify page");
+			//console.log("get data FROM identify page");
 			selectedData = JSON.parse(sessionStorage.getItem("identification"));
 		} else {
-			console.log("store data FOR identify page: " + JSON.stringify(selectedData));
+			//console.log("store data FOR identify page: " + JSON.stringify(selectedData));
 			sessionStorage.setItem("identification", JSON.stringify(selectedData));
 		}
 		/*End species session management*/
@@ -227,7 +227,7 @@ jQuery.extend({
 
 jQuery.extend({
 	getSubRegionFromSelection: function(selection) {
-		//http://stackoverflow.com/questions/17779744/regular-expression-to-get-a-string-between-parentheses-in-javascript		
+		//http://stackoverflow.com/questions/17779744/regular-expression-to-get-a-string-between-parentheses-in-javascript
 		var regExp = /\(([^)]+)\)/;
 		return selection.match(regExp)[1];
 	}
@@ -253,7 +253,7 @@ jQuery.extend({
 		table.setAttribute("class", className);
         table.setAttribute("data-role", "table");
         //table.setAttribute("data-mode", "columntoggle");
-        
+
 		var thead = document.createElement('thead');
 		var tr = document.createElement('tr');
 		var th1 = document.createElement('th');
@@ -272,7 +272,7 @@ jQuery.extend({
             th3.innerHTML = heading3;
             tr.appendChild(th3);
         }
-        
+
 		if (heading4 != "") {
             var th4 = document.createElement('th');
             //th4.setAttribute("data-priority", "2");
@@ -285,10 +285,10 @@ jQuery.extend({
             th5.innerHTML = heading5;
             tr.appendChild(th5);
         }
-       
+
 		thead.appendChild(tr);
 		table.appendChild(thead);
-		
+
 		return table;
 	}
 });
@@ -305,33 +305,34 @@ jQuery.extend({
 jQuery.extend({
 	getChecklistsTable: function(data, selection) {
 		var table = $.buildTableHeaders("submissionsTable", "tablesorter", "Hotspot", "Date", "Count*", "", "");
-		var tbody = document.createElement('tbody');		
-		
+		var tbody = document.createElement('tbody');
+
 		var speciesCount = 0;
 		var locNameDate = "";
 		var prevLocNameDate = data[0].locName + ";" + data[0].obsDt;
-		
+
 		for (var i = 0; i < data.length; i++) {
 			locNameDate = data[i].locName + ";" + data[i].obsDt;
-				
+
 			if (prevLocNameDate != locNameDate) {
 				// add new row, i.e., check-list.
 				var row = document.createElement('tr');
 
 				var locName = '<a href="#location" class="gotoLocation" title="' + data[i-1].locID + '" target="_self">' + data[i-1].locName + '</a>';
 				var howMany = speciesCount;
-				var obsDt = $.formatDateTime('dd-M hh:ii', new Date(data[i-1].obsDt));
-				
+        var datetime = data[i-1].obsDt.replace(/-/g , "/");
+				var obsDt = $.formatDateTime('dd M hh:ii', new Date(datetime));
+
 				row = $.buildTableCell(locName, row);
 				row = $.buildTableCell(obsDt, row);
 				row = $.buildTableCell(howMany, row);
-				
+
 				tbody.appendChild(row);
-				
+
 				speciesCount = 0;
 				prevLocNameDate = locNameDate;
 			} else {
-				speciesCount++;				
+				speciesCount++;
 			}
 		}
 		table.appendChild(tbody);
@@ -351,18 +352,17 @@ jQuery.extend({
 
 		for (var i = 0; i < data.length; i++) {
 			var row = document.createElement('tr');
-            
+
 			var species = '<a href="#species" class="gotoSpecies" title="'+ data[i].comName + ' (' + data[i].sciName + ')' + '" target="_self">' + data[i].comName + '</a>';
 			//var obsDt = '<a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a>';
 			var howMany = data[i].howMany || 'X'; //ternary operator.
             //var userName = data[i].userDisplayName;
             var locName = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
-            
-            //console.log(data[i].comName + ', ' + data[i].subID + ', ' + data[i].obsDt + ', ' + data[i].userDisplayName + ', ' + locName);
-            
+
             // Show different checklists as a row.
             if (prevSubId != data[i].subID) {
-                var submitted = '<a href="https://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + $.formatDateTime('dd-M hh:ii', new Date(data[i].obsDt)) + '</a> by ' + data[i].userDisplayName;
+                var datetime = data[i].obsDt.replace(/-/g , "/");
+                var submitted = '<a href="https://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + $.formatDateTime('dd M hh:ii', new Date(datetime)) + '</a> by ' + data[i].userDisplayName;
                 var submitRow = document.createElement('tr');
                 var cell = document.createElement('th');
                 cell.setAttribute("colspan", "3");
@@ -393,14 +393,15 @@ jQuery.extend({
 
 		for (var i = 0; i < data.length; i++) {
 			var row = document.createElement('tr');
-			
+
 			var species = '<a href="#species" class="gotoSpecies" title="'+ data[i].comName + ' (' + data[i].sciName + ')' + '" target="_self">' + data[i].comName + '</a>';
 			var howMany = data[i].howMany || 'X'; //ternary operator.
 			var obsDt = "";
-            
+
             // Show different visit dates as a row.
             if (previousDate != data[i].obsDt) {
-                obsDt = '<a href="https://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + $.formatDateTime('dd-M hh:ii', new Date(data[i].obsDt)) + '</a> by ' + data[i].userDisplayName;
+                var datetime = data[i].obsDt.replace(/-/g , "/");
+                obsDt = '<a href="https://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + $.formatDateTime('dd M hh:ii', new Date(datetime)) + '</a> by ' + data[i].userDisplayName;
                 var dateRow = document.createElement('tr');
                 var cell = document.createElement('th');
                 cell.setAttribute("colspan", "2");
@@ -412,10 +413,10 @@ jQuery.extend({
             }
 			row = $.buildTableCell(species, row);
 			row = $.buildTableCell(howMany, row);
-			
+
 			tbody.appendChild(row);
 		}
-		
+
 		table.appendChild(tbody);
 		return table;
 	}
@@ -431,15 +432,15 @@ jQuery.extend({
 
 			var location = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
 			var count = data[i].howMany || 'X';
-			var date = $.formatDateTime('dd-M hh:ii', new Date(data[i].obsDt));
+			var datetime = $.formatDateTime('dd M hh:ii', new Date(data[i].obsDt.replace(/-/g , "/")));
 
 			row = $.buildTableCell(location, row);
-			row = $.buildTableCell(date, row);
+			row = $.buildTableCell(datetime, row);
 			row = $.buildTableCell(count, row);
-			
+
 			tbody.appendChild(row);
 		}
-		
+
 		table.appendChild(tbody);
 		return table;
 	}
