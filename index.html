@@ -15,9 +15,9 @@
     <!-- end jQM -->
     <link rel="stylesheet" type="text/css" href="style.custom/styles.custom.css">
     <script>
-        var urlBase = "http://huntsebirds.appspot.com/";
+        //var urlBase = "http://huntsebirds.appspot.com/";
         //var urlBase = "http://localhost:8080/";
-        //var urlBase = "https://mebird-mrhapi.c9users.io/";
+        var urlBase = "https://mebird-mrhapi.c9users.io/";
         var dataFile = "data/region_usa_ma.xml";
         var noDataFound = "No data found, please search again.";
 
@@ -83,13 +83,14 @@
                 }
                 if (toPage == "species") {
                     //console.log("selectedData,1: " + JSON.stringify(selectedData));
-                    selectedData = $.populateIdentifySpecies(selectedData);
+                    //selectedData = $.populateIdentifySpecies(selectedData);
                     //console.log("selectedData,2: " + JSON.stringify(selectedData));
 
                     if (selectedData.sciName != "") {
                         tableData = $.getTableData("", "", selectedData.region, "species", "", selectedData.sciName);
                         if (tableData.table.rows.length > 0) {
-                            message = 'Sightings of <a href="identify.html" rel="external" data-ajax="false">' + selectedData.comName + '</a> in ' + selectedData.region + ' in last 14 days: ' + tableData.data + '.';
+                            var searchName = selectedData.comName.replace(/ /g , "+");
+                            message = 'Sightings of <a href="https://duckduckgo.com/?q=' + searchName + '&iax=1&ia=images" target="_blank">' + selectedData.comName + '</a> in ' + selectedData.region + ' in last 14 days: ' + tableData.data + '.';
                         }
                     }
                 }

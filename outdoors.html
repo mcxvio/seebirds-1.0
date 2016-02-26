@@ -35,7 +35,7 @@
             
             // Call eBird for last checklist date and add after location name.
             $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
-                var ebird = "http://ebird.org/ws1.1/data/obs/hotspot/recent?fmt=json&back=30&maxResults=1&r=";
+                var ebird = "//ebird.org/ws1.1/data/obs/hotspot/recent?fmt=json&back=30&maxResults=1&r=";
                 
                 $('a[href*="/hotspot/"]').each(function(index) {
                     var visited = "";
@@ -96,7 +96,7 @@
             </ul>
         </div>
         <div id="datepicker"></div>
-        <div data-role="footer" class="centerbox"><p class="copyright">&copy 2015 M Hunt.</p></div>
+        <div data-role="footer" class="centerbox"><p class="copyright">&copy 2016 M Hunt.</p></div>
     </div>
 </body>
 </html>

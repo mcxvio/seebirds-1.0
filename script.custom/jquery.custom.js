@@ -209,9 +209,9 @@ jQuery.extend({
 	}
 });
 
-jQuery.extend({
+/*jQuery.extend({
 	populateIdentifySpecies: function(selectedData) {
-		/*Start species session management*/
+		/*Start species session management/
 		if (selectedData.comName == "") {
 			// Populate from session, passed back from identify page.
 			//console.log("get data FROM identify page");
@@ -220,10 +220,10 @@ jQuery.extend({
 			//console.log("store data FOR identify page: " + JSON.stringify(selectedData));
 			sessionStorage.setItem("identification", JSON.stringify(selectedData));
 		}
-		/*End species session management*/
+		/*End species session management/
 		return selectedData;
 	}
-});
+});*/
 
 jQuery.extend({
 	getSubRegionFromSelection: function(selection) {
@@ -320,7 +320,7 @@ jQuery.extend({
 
 				var locName = '<a href="#location" class="gotoLocation" title="' + data[i-1].locID + '" target="_self">' + data[i-1].locName + '</a>';
 				var howMany = speciesCount;
-        var datetime = data[i-1].obsDt.replace(/-/g , "/");
+        		var datetime = data[i-1].obsDt.replace(/-/g , "/");
 				var obsDt = $.formatDateTime('dd M hh:ii', new Date(datetime));
 
 				row = $.buildTableCell(locName, row);
