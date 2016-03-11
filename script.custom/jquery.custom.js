@@ -64,20 +64,20 @@ jQuery.extend({
 		var tags = (page == "checklists") ? "#autocomplete-items-checklists" : "#autocomplete-items-notables";
 		var href = (page == "checklists") ? "#submissions" : "#sightings";
 
-	    $(tags).on("filterablebeforefilter", function (e, data) {
-	        var $ul = $(this),
-	            $input = $(data.input),
-	            value = $input.val(),
-	            html = "";
-	        $ul.html("");
+		$(tags).on("filterablebeforefilter", function (e, data) {
+			var $ul = $(this),
+				$input = $(data.input),
+				value = $input.val(),
+				html = "";
+			$ul.html("");
 
-	        if (value && value.length > 1) {
-	            $ul.html("<li><div class='ui-loader'><span class='ui-icon ui-icon-loading'></span></div></li>");
-	            $ul.listview("refresh");
+			if (value && value.length > 1) {
+				$ul.html("<li><div class='ui-loader'><span class='ui-icon ui-icon-loading'></span></div></li>");
+				$ul.listview("refresh");
 
 				var val;
 				$(filteredList).each(function () {
-					val = $(this).filterNode("name").text() + " (" + ($(this).filterNode("subnational2-code").text() || $(this).filterNode("subnational1-code").text()) + ")"
+					val = $(this).filterNode("name").text() + " (" + ($(this).filterNode("subnational2-code").text() || $(this).filterNode("subnational1-code").text()) + ")";
 					html += "<li><a href='" + href + "' class='gotoRegion'>" + val + "</a></li>";
 				});
 

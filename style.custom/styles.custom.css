@@ -24,3 +24,13 @@ div #title {
 div #info {
     padding-left: 10px;
 }
+/* Force content container with typeahead to expand to page min-height */
+#checklists .ui-content, #notables .ui-content {
+  border: 1px solid black;
+  min-height: 80vh !important;
+}
+
+/*.tt-menu .tt-selectable .tt-suggestion .tt-dataset .tt-dataset-engine  {
+  border: 1px solid red;
+  padding: 100px 100px 100px 100px !important;
+}*/
