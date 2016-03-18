@@ -1777,7 +1777,7 @@
             this.datasets = _.map(o.datasets, initializeDataset);
             function initializeDataset(oDataset) {
                 var node = that.$node.find(oDataset.node).first();
-                oDataset.node = node.length ? node : $("<div>").appendTo(that.$node);
+                oDataset.node = node.length ? node : $("<ul class='jqmobile-typeahead'>").appendTo(that.$node);
                 return new Dataset(oDataset, www);
             }
         }
@@ -1892,7 +1892,7 @@
             },
             destroy: function destroy() {
                 this.$node.off(".tt");
-                this.$node = $("<div>");
+                this.$node = $("<ul>");
                 _.each(this.datasets, destroyDataset);
                 function destroyDataset(dataset) {
                     dataset.destroy();

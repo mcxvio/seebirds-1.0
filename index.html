@@ -6,7 +6,6 @@
     <title>Hunt's eBirds</title>
     <link rel="stylesheet" type="text/css" href="script.tablesorter/styles.tablesorter.css">
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="script.tablesorter/jquery.tablesorter.min.js"></script>
     <script src="script.custom/jquery.formatDateTime.min.js"></script>
     <script src="script.custom/jquery.custom.js"></script>
     <!-- jQM -->
@@ -14,120 +13,123 @@
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <!-- end jQM -->
     <!-- Typeahead -->
-    <script src="script.custom/typeahead.bundle.min.js"></script>
+    <script src="script.custom/typeahead.bundle.js"></script>
     <script src="script.custom/bloodhound.min.js"></script>
     <script src="script.custom/prefetch.js"></script>
     <link rel="stylesheet" type="text/css" href="style.custom/typeahead.css">
     <!-- end Typeahead -->
     <link rel="stylesheet" type="text/css" href="style.custom/styles.custom.css">
     <script>
-        //var urlBase = "http://huntsebirds.appspot.com/";
-        //var urlBase = "http://localhost:8080/";
-        var urlBase = window.location.origin; //"https://mebird-mrhapi.c9users.io/";
-        var dataFile = "data/region_usa_ma.xml";
-        var noDataFound = "No data found, please search again.";
+//var urlBase = "http://huntsebirds.appspot.com/";
+//var urlBase = "http://localhost:8080/";
+var urlBase = window.location.origin; //"https://mebird-mrhapi.c9users.io/";
+var dataFile = "data/region_usa_ma.xml";
+var noDataFound = "No data found, please search again.";
 
-        (function( $ ) {
-            $(function() { // On document ready
-                $.spinner();
-            });
+(function( $ ) {
+    $(function() { // On document ready
+        $.spinner();
+    });
 
-            var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" };
+    var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" };
 
-            // Load autocomplete values & handle selection.
-            /*$(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
-                //var page = $(this).attr("id");
-                //if (page == "checklists" || page == "notables") {
-                    //$.populateAutocompletes(page, urlBase, dataFile);
-                    //$.populateTypeahead(page);
-                //}
-            });*/
+    // Load autocomplete values & handle selection.
+    /*$(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
+        //var page = $(this).attr("id");
+        //if (page == "checklists" || page == "notables") {
+            //$.populateAutocompletes(page, urlBase, dataFile);
+            //$.populateTypeahead(page);
+        //}
+    });*/
 
-            // Save selected region from autocomplete.
-            $(document).on("click", "a.gotoRegion", function() {
-                selectedData.region = $(this).text();
-            });
+    // Save selected region from autocomplete.
+    $(document).on("click", "a.gotoRegion", function() {
+        selectedData.region = $(this).text();
+    });
 
-            $(document).pagecontainer({ beforeshow: function(event, ui) { } });
-            // Load results data.
-            $(document).on("pagecontainerbeforeshow", function(event, ui){
-                // Set current copyright year.
-                $(".copyrightYear").html($.getCurrentYear());
+    $(document).pagecontainer({ beforeshow: function(event, ui) { } });
+    // Load results data.
+    $(document).on("pagecontainerbeforeshow", function(event, ui){
+        // Set current copyright year.
+        $(".copyrightYear").html($.getCurrentYear());
 
-                var toPage = ui.toPage[0].id;
-                var page = "#" + toPage;
-                var message = noDataFound;
-                var tableData = "";
+        var toPage = ui.toPage[0].id;
+        var page = "#" + toPage;
+        var message = noDataFound;
+        var tableData = "";
 
-                //console.log("pagecontainerbeforeshow: " + toPage);
+        //console.log("pagecontainerbeforeshow: " + toPage);
 
-                if (toPage == "submissions") {
-                    if (selectedData.region.length > 0) {
-                        tableData = $.getTableData("checklistsResults", "checklistsRegion", selectedData.region, "checklists", "", "");
+        if (toPage == "submissions") {
+            if (selectedData.region.length > 0) {
+                tableData = $.getTableData("checklistsResults", "checklistsRegion", selectedData.region, "checklists", "", "");
 
-                        if (tableData.table.rows.length > 0) {
-                            message = "Checklists with *count of species seen most recently in " + selectedData.region + ", in last 5 days: " + (tableData.table.rows.length-1) + ".";
-                        }
-                    } else {
-                        message = "<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
-                    }
+                /*if (tableData.table.rows.length > 0) {
+                    message = "Checklists with *count of species seen most recently in " + selectedData.region + ", in last 5 days: " + (tableData.table.rows.length-1) + ".";
+                }*/
+            } else {
+                message = "<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
+            }
+        }
+        if (toPage == "sightings") {
+            if (selectedData.region.length > 0) {
+                tableData = $.getTableData("notablesResults", "notablesRegion", selectedData.region, "notables", "", "");
+
+                if (tableData.table.rows.length > 0) {
+                    message = "Notable species for " + selectedData.region + ", in last 5 days: " + tableData.data + ".";
                 }
-                if (toPage == "sightings") {
-                    if (selectedData.region.length > 0) {
-                        tableData = $.getTableData("notablesResults", "notablesRegion", selectedData.region, "notables", "", "");
+            } else {
+                message = "<a href='#nav-panel-notable-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
+            }
+        }
+        if (toPage == "location") {
+            tableData = $.getTableData("", "", "", "location", selectedData.locId);
+            if (tableData.table.rows.length > 0) {
+                message = 'Sightings at <a href="http://ebird.org/ebird/hotspot/' + selectedData.locId + '" target="_blank">' + selectedData.locName + '</a> in last 14 days: ' + tableData.data + '.';
+            }
+        }
+        if (toPage == "species") {
+            //console.log("selectedData,1: " + JSON.stringify(selectedData));
+            //selectedData = $.populateIdentifySpecies(selectedData);
+            //console.log("selectedData,2: " + JSON.stringify(selectedData));
 
-                        if (tableData.table.rows.length > 0) {
-                            message = "Notable species for " + selectedData.region + ", in last 5 days: " + tableData.data + ".";
-                        }
-                    } else {
-                        message = "<a href='#nav-panel-notable-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
-                    }
+            if (selectedData.sciName != "") {
+                tableData = $.getTableData("", "", selectedData.region, "species", "", selectedData.sciName);
+                if (tableData.table.rows.length > 0) {
+                    var searchName = selectedData.comName.replace(/ /g , "+");
+                    message = 'Sightings of <a href="https://duckduckgo.com/?q=' + searchName + '&iax=1&ia=images" target="_blank">' + selectedData.comName + '</a> in ' + selectedData.region + ' in last 14 days: ' + tableData.data + '.';
                 }
-                if (toPage == "location") {
-                    tableData = $.getTableData("", "", "", "location", selectedData.locId);
-                    if (tableData.table.rows.length > 0) {
-                        message = 'Sightings at <a href="http://ebird.org/ebird/hotspot/' + selectedData.locId + '" target="_blank">' + selectedData.locName + '</a> in last 14 days: ' + tableData.data + '.';
-                    }
-                }
-                if (toPage == "species") {
-                    //console.log("selectedData,1: " + JSON.stringify(selectedData));
-                    //selectedData = $.populateIdentifySpecies(selectedData);
-                    //console.log("selectedData,2: " + JSON.stringify(selectedData));
+            }
+        }
+        if (toPage == "submissions") {
+            console.log("...", tableData);
+            $(page + " #results").html(tableData);
+        } else if (tableData != "" && tableData.table.rows.length > 1) {
+            $(page + " #message").html(message);
+            $(page + " #results").html(tableData.table);
+            //$(page + "Table").tablesorter(); //sorting, table name page plus 'Table'.
+            //$(page + "Table").table(); //show/hide columns, table name page plus 'Table'.
+        } else if (message != "") {
+            $(page + " #message").html(message);
+            $(page + " #results").html("");
+        }
+    });
+    
+    // Load location data.
+    $(document).on("click", "a.gotoLocation", function() {
+        selectedData.locId = $(this).attr('title');
+        selectedData.locName = $(this).text();
+    });
 
-                    if (selectedData.sciName != "") {
-                        tableData = $.getTableData("", "", selectedData.region, "species", "", selectedData.sciName);
-                        if (tableData.table.rows.length > 0) {
-                            var searchName = selectedData.comName.replace(/ /g , "+");
-                            message = 'Sightings of <a href="https://duckduckgo.com/?q=' + searchName + '&iax=1&ia=images" target="_blank">' + selectedData.comName + '</a> in ' + selectedData.region + ' in last 14 days: ' + tableData.data + '.';
-                        }
-                    }
-                }
-                if (tableData != "" && tableData.table.rows.length > 1) {
-                    $(page + " #message").html(message);
-                    $(page + " #results").html(tableData.table);
-                    //$(page + "Table").tablesorter(); //sorting, table name page plus 'Table'.
-                    //$(page + "Table").table(); //show/hide columns, table name page plus 'Table'.
-                } else if (message != "") {
-                    $(page + " #message").html(message);
-                    $(page + " #results").html("");
-                }
-            });
-            
-            // Load location data.
-            $(document).on("click", "a.gotoLocation", function() {
-                selectedData.locId = $(this).attr('title');
-                selectedData.locName = $(this).text();
-            });
-
-            // Load species data.
-            $(document).on("click", "a.gotoSpecies", function() {
-                var title = $(this).attr('title');
-                var sciName = $.getSubRegionFromSelection(title);
-                var comName = title.substring(0, title.indexOf('(')-1);
-                selectedData.sciName = sciName;
-                selectedData.comName = comName;
-            });
-        })( jQuery );
+    // Load species data.
+    $(document).on("click", "a.gotoSpecies", function() {
+        var title = $(this).attr('title');
+        var sciName = $.getSubRegionFromSelection(title);
+        var comName = title.substring(0, title.indexOf('(')-1);
+        selectedData.sciName = sciName;
+        selectedData.comName = comName;
+    });
+})( jQuery );
     </script>
 </head>
 <body>
@@ -152,8 +154,8 @@
         </div>
         <div role="main" class="ui-content" id="prefetch">
             <!-- Typeahead -->
-            <input class="typeahead" placeholder="Search for State or County" type="search"
-                data-role="none" />
+            <input class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead"
+                placeholder="Search for State or County" type="search" data-role="none" />
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-checklists" data-display="overlay" data-position="left">
                 <ul data-role="listview">
@@ -198,7 +200,8 @@
         </div>
         <div data-role="main" class="ui-content" id="prefetch">
             <!-- Typeahead -->
-            <input id="autocomplete-input" class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead" placeholder="Search for State or County" type="search" data-role="none">
+            <input class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead"
+                placeholder="Search for State or County" type="search" data-role="none">
             <!-- Autocomplete -->
             <!--<form class="ui-filterable"><input id="autocomplete-input-notables" data-type="search" placeholder="Search for State or County" autofocus="autofocus"></form>
             <ul id="autocomplete-items-notables" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input-notables"></ul>-->

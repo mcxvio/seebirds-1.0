@@ -25,12 +25,20 @@ div #info {
     padding-left: 10px;
 }
 /* Force content container with typeahead to expand to page min-height */
-#checklists .ui-content, #notables .ui-content {
+#checklists .ui-content,
+#notables .ui-content {
   border: 1px solid black;
   min-height: 80vh !important;
 }
 
-/*.tt-menu .tt-selectable .tt-suggestion .tt-dataset .tt-dataset-engine  {
-  border: 1px solid red;
-  padding: 100px 100px 100px 100px !important;
-}*/
+.jqmobile-typeahead {
+    padding: 0px 0px 0px 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;    
+}
+
+.gotoRegion {
+    margin-top: -1px;
+    margin-bottom: 0px;
+    text-align: left;
+}

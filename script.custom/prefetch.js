@@ -32,7 +32,7 @@ $(document).on("pagecreate", "#checklists", function() {
     $('#checklists #prefetch .typeahead').typeahead(
       {
           hint: true,
-          //highlight: true,
+          highlight: true,
           minLength: 1
       },
       {
@@ -46,7 +46,7 @@ $(document).on("pagecreate", "#checklists", function() {
 				'</div>'
               ].join('\n'),
               suggestion: function(data) {
-                return "<a href='#submissions' class='gotoRegion ui-btn'>" + data.value + "</a>";
+                return "<li><a href='#submissions' class='gotoRegion ui-btn ui-btn-icon-right ui-icon-carat-r'>" + data.value + "</a></li>";
 			  }
           }
 	  }
@@ -113,7 +113,7 @@ $(document).on("pagecreate", "#notables", function() {
 				'</div>'
               ].join('\n'),
               suggestion: function(data) {
-                return "<a href='#sightings' class='gotoRegion'>" + data.value + "</a>";
+                return "<li><a href='#sightings' class='gotoRegion ui-btn ui-btn-icon-right ui-icon-carat-r'>" + data.value + "</a></li>";
               }
           }
 	  }

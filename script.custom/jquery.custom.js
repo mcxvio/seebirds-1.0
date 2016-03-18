@@ -129,7 +129,8 @@ jQuery.extend({
 
             if (ebirdData.length > 0) {
                 if (search == "checklists") {
-                    htmlTable = $.getChecklistsTable(ebirdData, region);
+                    //htmlTable = $.getChecklistsTable(ebirdData, region);
+                    htmlTable = $.getChecklistsHtml(ebirdData, region);
                 }
                 if (search == "notables") {
                     htmlTable = $.getNotablesTable(ebirdData, region);
@@ -138,7 +139,11 @@ jQuery.extend({
         }
 
 		// http://stackoverflow.com/questions/3175687/how-best-to-implement-out-params-in-javascript
-        return (htmlTable.rows.length > 0) ? { table: htmlTable, data: ebirdData.length } : "";
+		if (search == "checklists") {
+			return htmlTable;
+		} else {
+	        return (htmlTable.rows.length > 0) ? { table: htmlTable, data: ebirdData.length } : "";
+		}
     }
 });
 
@@ -299,6 +304,49 @@ jQuery.extend({
 		cell.innerHTML = cellData;
 		row.appendChild(cell);
 		return row;
+	}
+});
+
+jQuery.extend({
+	getChecklistsHtml: function(data, selection) {
+
+		var ul = document.createElement('ul');
+		ul.setAttribute("data-role", "listview");
+
+		var speciesCount = 0;
+		var locNameDate = "";
+		var prevLocNameDate = data[0].locName + ";" + data[0].obsDt;
+
+		for (var i = 0; i < data.length; i++) {
+			locNameDate = data[i].locName + ";" + data[i].obsDt;
+
+			if (prevLocNameDate != locNameDate) {
+				// add new row, i.e., check-list.
+				var row = document.createElement('li');
+
+				var locName = '<a href="#location" class="gotoLocation" title="' + data[i-1].locID + '" target="_self">' + data[i-1].locName + '</a>';
+				var howMany = speciesCount;
+        		var datetime = data[i-1].obsDt.replace(/-/g , "/");
+				var obsDt = $.formatDateTime('hh:ii', new Date(datetime));
+
+				/*
+				row = $.buildTableCell(locName, row);
+				row = $.buildTableCell(obsDt, row);
+				row = $.buildTableCell(howMany, row);
+				*/
+				
+				row.innerHTML = howMany + " species @ " + locName + " @ " + obsDt;
+
+				ul.appendChild(row);
+
+				speciesCount = 0;
+				prevLocNameDate = locNameDate;
+			} else {
+				speciesCount++;
+			}
+		}
+		console.log("ul: ", ul);
+		return ul;
 	}
 });
 
