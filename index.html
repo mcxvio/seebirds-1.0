@@ -4,7 +4,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Hunt's eBirds</title>
-    <link rel="stylesheet" type="text/css" href="script.tablesorter/styles.tablesorter.css">
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="script.custom/jquery.formatDateTime.min.js"></script>
     <script src="script.custom/jquery.custom.js"></script>
@@ -20,10 +19,6 @@
     <!-- end Typeahead -->
     <link rel="stylesheet" type="text/css" href="style.custom/styles.custom.css">
     <script>
-//var urlBase = "http://huntsebirds.appspot.com/";
-//var urlBase = "http://localhost:8080/";
-var urlBase = window.location.origin; //"https://mebird-mrhapi.c9users.io/";
-var dataFile = "data/region_usa_ma.xml";
 var noDataFound = "No data found, please search again.";
 
 (function( $ ) {
@@ -33,20 +28,15 @@ var noDataFound = "No data found, please search again.";
 
     var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" };
 
-    // Load autocomplete values & handle selection.
-    /*$(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
-        //var page = $(this).attr("id");
-        //if (page == "checklists" || page == "notables") {
-            //$.populateAutocompletes(page, urlBase, dataFile);
-            //$.populateTypeahead(page);
-        //}
-    });*/
-
     // Save selected region from autocomplete.
     $(document).on("click", "a.gotoRegion", function() {
         selectedData.region = $(this).text();
     });
 
+    $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
+        //var page = $(this).attr("id");
+    });
+    
     $(document).pagecontainer({ beforeshow: function(event, ui) { } });
     // Load results data.
     $(document).on("pagecontainerbeforeshow", function(event, ui){
@@ -58,15 +48,12 @@ var noDataFound = "No data found, please search again.";
         var message = noDataFound;
         var tableData = "";
 
-        //console.log("pagecontainerbeforeshow: " + toPage);
-
         if (toPage == "submissions") {
             if (selectedData.region.length > 0) {
                 tableData = $.getTableData("checklistsResults", "checklistsRegion", selectedData.region, "checklists", "", "");
-
-                /*if (tableData.table.rows.length > 0) {
-                    message = "Checklists with *count of species seen most recently in " + selectedData.region + ", in last 5 days: " + (tableData.table.rows.length-1) + ".";
-                }*/
+                if (tableData.children.length > 0) {
+                    message = tableData.children.length + " checklists with species seen most recently in " + selectedData.region + ", in last 5 days.";
+                }
             } else {
                 message = "<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
             }
@@ -74,9 +61,8 @@ var noDataFound = "No data found, please search again.";
         if (toPage == "sightings") {
             if (selectedData.region.length > 0) {
                 tableData = $.getTableData("notablesResults", "notablesRegion", selectedData.region, "notables", "", "");
-
-                if (tableData.table.rows.length > 0) {
-                    message = "Notable species for " + selectedData.region + ", in last 5 days: " + tableData.data + ".";
+                if (tableData.children.length > 0) {
+                    message = tableData.children.length + " notable species for " + selectedData.region + ", in last 5 days.";
                 }
             } else {
                 message = "<a href='#nav-panel-notable-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
@@ -84,31 +70,22 @@ var noDataFound = "No data found, please search again.";
         }
         if (toPage == "location") {
             tableData = $.getTableData("", "", "", "location", selectedData.locId);
-            if (tableData.table.rows.length > 0) {
-                message = 'Sightings at <a href="http://ebird.org/ebird/hotspot/' + selectedData.locId + '" target="_blank">' + selectedData.locName + '</a> in last 14 days: ' + tableData.data + '.';
+            if (tableData.children.length > 0) {
+                message = tableData.children.length + ' sightings at <a href="http://ebird.org/ebird/hotspot/' + selectedData.locId + '" target="_blank">' + selectedData.locName + '</a> in last 14 days.';
             }
         }
         if (toPage == "species") {
-            //console.log("selectedData,1: " + JSON.stringify(selectedData));
-            //selectedData = $.populateIdentifySpecies(selectedData);
-            //console.log("selectedData,2: " + JSON.stringify(selectedData));
-
             if (selectedData.sciName != "") {
                 tableData = $.getTableData("", "", selectedData.region, "species", "", selectedData.sciName);
-                if (tableData.table.rows.length > 0) {
+                if (tableData.children.length > 0) {
                     var searchName = selectedData.comName.replace(/ /g , "+");
-                    message = 'Sightings of <a href="https://duckduckgo.com/?q=' + searchName + '&iax=1&ia=images" target="_blank">' + selectedData.comName + '</a> in ' + selectedData.region + ' in last 14 days: ' + tableData.data + '.';
+                    message = tableData.children.length + ' sightings of <a href="https://duckduckgo.com/?q=' + searchName + '&iax=1&ia=images" target="_blank">' + selectedData.comName + '</a> in ' + selectedData.region + ' in last 14 days.';
                 }
             }
         }
-        if (toPage == "submissions") {
-            console.log("...", tableData);
-            $(page + " #results").html(tableData);
-        } else if (tableData != "" && tableData.table.rows.length > 1) {
+        if (tableData != "" && tableData.children.length > 1) {
             $(page + " #message").html(message);
-            $(page + " #results").html(tableData.table);
-            //$(page + "Table").tablesorter(); //sorting, table name page plus 'Table'.
-            //$(page + "Table").table(); //show/hide columns, table name page plus 'Table'.
+            $(page + " #results").html(tableData);
         } else if (message != "") {
             $(page + " #message").html(message);
             $(page + " #results").html("");
@@ -177,8 +154,9 @@ var noDataFound = "No data found, please search again.";
         </div>
         <div role="main" class="ui-content">
             <div id="message"></div>
+            <br /><br />
             <div id="results"></div>
-            <br />
+            <br /><br />
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-checklist-sightings" data-display="overlay" data-position="left">
                 <ul data-role="listview">
@@ -226,8 +204,9 @@ var noDataFound = "No data found, please search again.";
         </div>
         <div role="main" class="ui-content">
             <div id="message"></div>
+            <br><br>
             <div id="results"></div>
-            <br />
+            <br><br>
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-notable-sightings" data-display="overlay" data-position="left">
                 <ul data-role="listview">
@@ -249,8 +228,9 @@ var noDataFound = "No data found, please search again.";
         </div>
         <div role="main" class="ui-content">
             <div id="message"></div>
+            <br><br>
             <div id="results"></div>
-            <br />
+            <br><br>
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-location" data-display="overlay" data-position="left">
                 <ul data-role="listview">
@@ -272,8 +252,9 @@ var noDataFound = "No data found, please search again.";
         </div>
         <div role="main" class="ui-content">
             <div id="message"></div>
+            <br><br>
             <div id="results"></div>
-            <br />
+            <br><br>
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-species" data-display="overlay" data-position="left">
                 <ul data-role="listview">

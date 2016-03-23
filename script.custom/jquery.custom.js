@@ -1,3 +1,4 @@
+/*
 jQuery.fn.extend({
 	//http://www.steveworkman.com/html5-2/javascript/2011/improving-javascript-xml-node-finding-performance-by-2000/
 	filterNode: function(name) {
@@ -6,7 +7,7 @@ jQuery.fn.extend({
 		});
 	}
 });
-
+*/
 jQuery.extend({
 	getCurrentYear: function() {
 		return new Date().getFullYear();
@@ -55,7 +56,7 @@ jQuery.extend({
 		return result;
 	}
 });
-
+/*
 jQuery.extend({
 	populateAutocompletes: function(page, url, file) {
 		var xml = $.getValues(url + file, "xml");
@@ -103,7 +104,7 @@ jQuery.extend({
 		return tags;
 	}
 });
-
+*/
 jQuery.extend({
     getTableData: function(resultsToGet, regionToGet, region, search, locId, sciName) {
         var htmlTable = "";
@@ -114,7 +115,7 @@ jQuery.extend({
             ebirdData = $.getValues(url, "json");
 
             if (ebirdData.length > 0) {
-                htmlTable = $.getLocationTable(ebirdData);
+                htmlTable = $.getLocationHtml(ebirdData);
             }
         }
         else if (search == "species") {
@@ -122,24 +123,23 @@ jQuery.extend({
             ebirdData = $.getValues(url, "json");
 
             if (ebirdData.length > 0) {
-                htmlTable = $.getSpeciesTable(ebirdData, region);
+                htmlTable = $.getSpeciesHtml(ebirdData, region);
             }
         } else {
             ebirdData = $.getData(resultsToGet, regionToGet, region, search);
 
             if (ebirdData.length > 0) {
                 if (search == "checklists") {
-                    //htmlTable = $.getChecklistsTable(ebirdData, region);
                     htmlTable = $.getChecklistsHtml(ebirdData, region);
                 }
                 if (search == "notables") {
-                    htmlTable = $.getNotablesTable(ebirdData, region);
+                    htmlTable = $.getNotablesHtml(ebirdData, region);
                 }
             }
         }
 
 		// http://stackoverflow.com/questions/3175687/how-best-to-implement-out-params-in-javascript
-		if (search == "checklists") {
+		if (search == "checklists" || search == "notables" || search == "location" || search == "species") {
 			return htmlTable;
 		} else {
 	        return (htmlTable.rows.length > 0) ? { table: htmlTable, data: ebirdData.length } : "";
@@ -153,7 +153,6 @@ jQuery.extend({
         var storedData = sessionStorage.getItem(resultsToGet);
         var storedRegion = sessionStorage.getItem(regionToGet);
 
-				//console.log('storedData__' + storedData + '__' + storedRegion);
         // Stored data present is for selected region.
         if ((storedData != null && storedData != "null") &&
         	(storedRegion != null && storedRegion != "null") && storedRegion == region) {
@@ -214,22 +213,6 @@ jQuery.extend({
 	}
 });
 
-/*jQuery.extend({
-	populateIdentifySpecies: function(selectedData) {
-		/*Start species session management/
-		if (selectedData.comName == "") {
-			// Populate from session, passed back from identify page.
-			//console.log("get data FROM identify page");
-			selectedData = JSON.parse(sessionStorage.getItem("identification"));
-		} else {
-			//console.log("store data FOR identify page: " + JSON.stringify(selectedData));
-			sessionStorage.setItem("identification", JSON.stringify(selectedData));
-		}
-		/*End species session management/
-		return selectedData;
-	}
-});*/
-
 jQuery.extend({
 	getSubRegionFromSelection: function(selection) {
 		//http://stackoverflow.com/questions/17779744/regular-expression-to-get-a-string-between-parentheses-in-javascript
@@ -237,7 +220,7 @@ jQuery.extend({
 		return selection.match(regExp)[1];
 	}
 });
-
+/*
 jQuery.extend({
 	getAppendRegion: function(selection) {
 		return ($.getSubRegionFromSelection(selection).length == 3);
@@ -249,8 +232,166 @@ jQuery.extend({
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 });
+*/
+
+function extractDatetimesFromResultsData(data) {
+	/* Extract distinct datetimes from ebird json results */
+	var lookup = {};
+	var items = data;
+	var result = [];
+	
+	for (var item, i = 0; item = items[i++];) {
+	  var name = item.obsDt;
+	
+	  if (!(name in lookup)) {
+	    lookup[name] = 1;
+	    result.push(name);
+	  }
+	}
+	return result;
+}
+
+function getUnorderedList() {
+	var ul = document.createElement('ul');
+	ul.setAttribute("data-role", "listview");
+	ul.setAttribute("class", "ui-listview");
+	return ul;
+}
+
+function getListItem(innerHtml) {
+	var li = document.createElement('li');
+	li.setAttribute("class", "ui-li-static ui-body-inherit");
+	li.innerHTML = innerHtml; //species + " species @ " + location + " @ " + time;
+	return li;
+}
+
+function getListItemDivider(innerHtml) {
+	var lid = document.createElement('li');
+	lid.setAttribute("data-role", "list-divider");
+	lid.setAttribute("role", "heading");
+	lid.setAttribute("class", "ui-li-divider ui-bar-a");
+	lid.innerHTML = innerHtml;
+	return lid;
+}
+
+jQuery.extend({
+	getChecklistsHtml: function(data, selection) {
+		var ul = getUnorderedList();
+		var extractedDatetimes = extractDatetimesFromResultsData(data);
+		/* Set date for dividing list item and use the date collection to extract summary of checklist data for display */
+		var prevDate = "";
+		for (var j = 0; j < extractedDatetimes.length; ++j) {
+			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
+			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
+			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j])); 
+			var count = checklist.length;
+			var location = '<a href="#location" class="gotoLocation" title="' + checklist[0].locID + '" target="_self">' + checklist[0].locName + '</a>';
+			
+			if (prevDate != date) {
+				//write out date heading.
+				ul.appendChild(getListItemDivider(date));				
+				prevDate = date;
+			}
+
+			var innerHtml = count + " species @ " + location + " @ " + time;
+			ul.appendChild(getListItem(innerHtml));
+		}
+		return ul;
+	}
+});
+
+jQuery.extend({
+	getNotablesHtml: function(data, selection) {
+		var ul = getUnorderedList();
+		var extractedDatetimes = extractDatetimesFromResultsData(data);
+		/* Set date for dividing list item and use the date collection to extract summary of checklist data for display */
+		var prevDate = "";
+		for (var j = 0; j < extractedDatetimes.length; ++j) {
+			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
+			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
+			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j]));
+
+			if (prevDate != date) {
+				//write out date heading.
+				ul.appendChild(getListItemDivider(date));				
+				prevDate = date;
+			}
+
+			for (var k = 0; k < checklist.length; k++) {
+				var count = checklist[k].howMany || 'X'; //ternary operator.
+				var species = '<a href="#species" class="gotoSpecies" title="'+ checklist[k].comName + ' (' + checklist[k].sciName + ')' + '" target="_self">' + checklist[k].comName + '</a>';
+	            var location = '<a href="#location" class="gotoLocation" title="' + checklist[k].locID + '" target="_self">' + checklist[k].locName + '</a>';
+    			var timeOut = '<a href="https://ebird.org/ebird/view/checklist?subID=' + checklist[k].subID + '" target="_blank">' + time + '</a>';
+				var userName = checklist[k].userDisplayName;
+				var innerHtml = count + " " + species + " @ " + location + " @ " + timeOut + "<br> -- " + userName;
+				ul.appendChild(getListItem(innerHtml));
+			}
+		}
+		return ul;		
+	}
+});
+
+jQuery.extend({
+	getLocationHtml: function(data) {
+		var ul = getUnorderedList();
+		var extractedDatetimes = extractDatetimesFromResultsData(data);
+		/* Set date for dividing list item and use the date collection to extract summary of checklist data for display */
+		var prevDate = "";
+		for (var j = 0; j < extractedDatetimes.length; ++j) {
+			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
+			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
+			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j]));
+
+			if (prevDate != date) {
+				//write out date heading.
+				ul.appendChild(getListItemDivider(date));				
+				prevDate = date;
+			}
+
+			for (var k = 0; k < checklist.length; k++) {
+				var count = checklist[k].howMany || 'X'; //ternary operator.
+				var species = '<a href="#species" class="gotoSpecies" title="'+ checklist[k].comName + ' (' + checklist[k].sciName + ')' + '" target="_self">' + checklist[k].comName + '</a>';
+    			var timeOut = '<a href="https://ebird.org/ebird/view/checklist?subID=' + checklist[k].subID + '" target="_blank">' + time + '</a>';
+	            var userName = checklist[k].userDisplayName;
+				var innerHtml = count + " " + species + " @ " + timeOut + "<br>-- " + userName;
+				ul.appendChild(getListItem(innerHtml));
+			}
+		}
+		return ul;
+	}
+});
+
+jQuery.extend({
+	getSpeciesHtml: function(data, regName) {
+		var ul = getUnorderedList();
+		var extractedDatetimes = extractDatetimesFromResultsData(data);
+		
+		console.log("species data: ", data);
+		
+		/* Set date for dividing list item and use the date collection to extract summary of checklist data for display */
+		var prevDate = "";
+		for (var j = 0; j < extractedDatetimes.length; ++j) {
+			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
+			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
+			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j]));
+			var count = checklist.length;
+			var location = '<a href="#location" class="gotoLocation" title="' + checklist[0].locID + '" target="_self">' + checklist[0].locName + '</a>';
+			
+			if (prevDate != date) {
+				//write out date heading.
+				ul.appendChild(getListItemDivider(date));				
+				prevDate = date;
+			}
+
+			var innerHtml = count + " @ " + location + " @ " + time;
+			ul.appendChild(getListItem(innerHtml));
+		}
+		return ul;
+	}	
+});
 
 // START: Get Tables.
+/*
 jQuery.extend({
 	buildTableHeaders: function(idName, className, heading1, heading2, heading3, heading4, heading5) {
 		var table = document.createElement("table");
@@ -271,9 +412,6 @@ jQuery.extend({
 
         if (heading3 != "") {
             var th3 = document.createElement('th');
-            /*if (heading5 != "Observer") {
-                th3.setAttribute("data-priority", "1");
-            }*/
             th3.innerHTML = heading3;
             tr.appendChild(th3);
         }
@@ -304,49 +442,6 @@ jQuery.extend({
 		cell.innerHTML = cellData;
 		row.appendChild(cell);
 		return row;
-	}
-});
-
-jQuery.extend({
-	getChecklistsHtml: function(data, selection) {
-
-		var ul = document.createElement('ul');
-		ul.setAttribute("data-role", "listview");
-
-		var speciesCount = 0;
-		var locNameDate = "";
-		var prevLocNameDate = data[0].locName + ";" + data[0].obsDt;
-
-		for (var i = 0; i < data.length; i++) {
-			locNameDate = data[i].locName + ";" + data[i].obsDt;
-
-			if (prevLocNameDate != locNameDate) {
-				// add new row, i.e., check-list.
-				var row = document.createElement('li');
-
-				var locName = '<a href="#location" class="gotoLocation" title="' + data[i-1].locID + '" target="_self">' + data[i-1].locName + '</a>';
-				var howMany = speciesCount;
-        		var datetime = data[i-1].obsDt.replace(/-/g , "/");
-				var obsDt = $.formatDateTime('hh:ii', new Date(datetime));
-
-				/*
-				row = $.buildTableCell(locName, row);
-				row = $.buildTableCell(obsDt, row);
-				row = $.buildTableCell(howMany, row);
-				*/
-				
-				row.innerHTML = howMany + " species @ " + locName + " @ " + obsDt;
-
-				ul.appendChild(row);
-
-				speciesCount = 0;
-				prevLocNameDate = locNameDate;
-			} else {
-				speciesCount++;
-			}
-		}
-		console.log("ul: ", ul);
-		return ul;
 	}
 });
 
@@ -493,4 +588,5 @@ jQuery.extend({
 		return table;
 	}
 });
+*/
 // END: Get Tables.
