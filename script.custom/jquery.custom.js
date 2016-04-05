@@ -1,13 +1,3 @@
-/*
-jQuery.fn.extend({
-	//http://www.steveworkman.com/html5-2/javascript/2011/improving-javascript-xml-node-finding-performance-by-2000/
-	filterNode: function(name) {
-		return this.find('*').filter(function() {
-			return this.nodeName === name; //gets all elements with name
-		});
-	}
-});
-*/
 jQuery.extend({
 	getCurrentYear: function() {
 		return new Date().getFullYear();
@@ -56,94 +46,42 @@ jQuery.extend({
 		return result;
 	}
 });
-/*
-jQuery.extend({
-	populateAutocompletes: function(page, url, file) {
-		var xml = $.getValues(url + file, "xml");
-		var filteredList = $(xml).filterNode("region");
-
-		var tags = (page == "checklists") ? "#autocomplete-items-checklists" : "#autocomplete-items-notables";
-		var href = (page == "checklists") ? "#submissions" : "#sightings";
-
-		$(tags).on("filterablebeforefilter", function (e, data) {
-			var $ul = $(this),
-				$input = $(data.input),
-				value = $input.val(),
-				html = "";
-			$ul.html("");
-
-			if (value && value.length > 1) {
-				$ul.html("<li><div class='ui-loader'><span class='ui-icon ui-icon-loading'></span></div></li>");
-				$ul.listview("refresh");
-
-				var val;
-				$(filteredList).each(function () {
-					val = $(this).filterNode("name").text() + " (" + ($(this).filterNode("subnational2-code").text() || $(this).filterNode("subnational1-code").text()) + ")";
-					html += "<li><a href='" + href + "' class='gotoRegion'>" + val + "</a></li>";
-				});
-
-				$ul.html(html);
-				$ul.listview("refresh");
-				$ul.trigger("updatelayout");
-			}
-		});
-	}
-});
 
 jQuery.extend({
-	getAutocompleteNameTags: function(url) {
-		// Retrieve raw XML data for autocomplete.
-		var xml = $.getValues(url, "xml");
-		var filteredList = $(xml).filterNode("region");
-		var tags = [];
-
-		$(filteredList).each(function () {
-			tags.push($(this).filterNode("name").text() + " (" + ($(this).filterNode("subnational2-code").text() || $(this).filterNode("subnational1-code").text()) + ")");
-		});
-
-		return tags;
-	}
-});
-*/
-jQuery.extend({
-    getTableData: function(resultsToGet, regionToGet, region, search, locId, sciName) {
-        var htmlTable = "";
+    getOutputHtml: function(resultsToGet, regionToGet, region, search, locId, sciName) {
+        var outputHtml = "";
 		var ebirdData = "";
+		var url = "";
 
         if (search == "location") {
-            var url = $.geteBirdApiUrl(locId, "location", "");
+            url = $.geteBirdApiUrl(locId, "location", "");
             ebirdData = $.getValues(url, "json");
 
             if (ebirdData.length > 0) {
-                htmlTable = $.getLocationHtml(ebirdData);
+                outputHtml = $.getLocationHtml(ebirdData, locId);
             }
         }
         else if (search == "species") {
-            var url = $.geteBirdApiUrl(region, "species", sciName);
+            url = $.geteBirdApiUrl(region, "species", sciName);
             ebirdData = $.getValues(url, "json");
 
             if (ebirdData.length > 0) {
-                htmlTable = $.getSpeciesHtml(ebirdData, region);
+                outputHtml = $.getSpeciesHtml(ebirdData, region);
             }
         } else {
             ebirdData = $.getData(resultsToGet, regionToGet, region, search);
 
             if (ebirdData.length > 0) {
                 if (search == "checklists") {
-                    htmlTable = $.getChecklistsHtml(ebirdData, region);
+                    outputHtml = $.getChecklistsHtml(ebirdData, region);
                 }
                 if (search == "notables") {
-                    htmlTable = $.getNotablesHtml(ebirdData, region);
+                    outputHtml = $.getNotablesHtml(ebirdData, region);
                 }
             }
         }
 
-		// http://stackoverflow.com/questions/3175687/how-best-to-implement-out-params-in-javascript
-		if (search == "checklists" || search == "notables" || search == "location" || search == "species") {
-			return htmlTable;
-		} else {
-	        return (htmlTable.rows.length > 0) ? { table: htmlTable, data: ebirdData.length } : "";
-		}
+		return outputHtml;
     }
 });
 
@@ -178,7 +116,7 @@ jQuery.extend({
 		var url = "";
 
 		if (api == "location") {
-			url = "//ebird.org/ws1.1/data/obs/hotspot/recent?r=" + selection + "&detail=full&includeProvisional=true&back=14&fmt=json";
+			url = "//ebird.org/ws1.1/data/obs/hotspot/recent?r=" + selection + "&detail=full&includeProvisional=true&back=10&fmt=json";
 		} else {
 			var subregion = $.getSubRegionFromSelection(selection);
 			var regex = /-/gi;
@@ -188,7 +126,7 @@ jQuery.extend({
 				if (subregion.match(regex).length == 1) {
 					rtype = "subnational1";
 				}
-				url = "//ebird.org/ws1.1/data/obs/region_spp/recent?rtype=" + rtype + "&r=" + subregion + "&sci=" + sciName + "&hotspot=true&includeProvisional=true&back=14&fmt=json";
+				url = "//ebird.org/ws1.1/data/obs/region_spp/recent?rtype=" + rtype + "&r=" + subregion + "&sci=" + sciName + "&hotspot=true&includeProvisional=true&back=10&fmt=json";
 			} else {
 				rtype = "subnational1";
 				if (subregion.length == 3) {
@@ -220,66 +158,70 @@ jQuery.extend({
 		return selection.match(regExp)[1];
 	}
 });
-/*
+
+
 jQuery.extend({
-	getAppendRegion: function(selection) {
-		return ($.getSubRegionFromSelection(selection).length == 3);
+	extractDatetimesFromResultsData: function (data) {
+		/* Extract distinct datetimes from ebird json results */
+		var lookup = {};
+		var items = data;
+		var result = [];
+		
+		for (var item, i = 0; item = items[i++];) {
+		  var name = item.obsDt;
+		
+		  if (!(name in lookup)) {
+		    lookup[name] = 1;
+		    result.push(name);
+		  }
+		}
+		return result;
 	}
 });
 
 jQuery.extend({
-    capitalizeFirstLetter: function(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-});
-*/
-
-function extractDatetimesFromResultsData(data) {
-	/* Extract distinct datetimes from ebird json results */
-	var lookup = {};
-	var items = data;
-	var result = [];
-	
-	for (var item, i = 0; item = items[i++];) {
-	  var name = item.obsDt;
-	
-	  if (!(name in lookup)) {
-	    lookup[name] = 1;
-	    result.push(name);
-	  }
+	getUnorderedList: function () {
+		var ul = document.createElement('ul');
+		ul.setAttribute("data-role", "listview");
+		ul.setAttribute("class", "ui-listview");
+		return ul;
 	}
-	return result;
-}
+});
 
-function getUnorderedList() {
-	var ul = document.createElement('ul');
-	ul.setAttribute("data-role", "listview");
-	ul.setAttribute("class", "ui-listview");
-	return ul;
-}
+jQuery.extend({
+	getListItem: function (innerHtml) {
+		var li = document.createElement('li');
+		li.setAttribute("class", "ui-li-static ui-body-inherit");
+		li.innerHTML = innerHtml;
+		return li;
+	}
+});
 
-function getListItem(innerHtml) {
-	var li = document.createElement('li');
-	li.setAttribute("class", "ui-li-static ui-body-inherit");
-	li.innerHTML = innerHtml; //species + " species @ " + location + " @ " + time;
-	return li;
-}
+jQuery.extend({
+	getListItemDivider: function (innerHtml) {
+		var lid = document.createElement('li');
+		lid.setAttribute("data-role", "list-divider");
+		lid.setAttribute("role", "heading");
+		lid.setAttribute("class", "ui-li-divider ui-bar-a");
+		lid.innerHTML = innerHtml;
+		return lid;
+	}
+});
 
-function getListItemDivider(innerHtml) {
-	var lid = document.createElement('li');
-	lid.setAttribute("data-role", "list-divider");
-	lid.setAttribute("role", "heading");
-	lid.setAttribute("class", "ui-li-divider ui-bar-a");
-	lid.innerHTML = innerHtml;
-	return lid;
-}
+jQuery.extend({
+	getSelectChecklistsNotablesMessage: function(message) {
+		var ul = $.getUnorderedList();
+		ul.appendChild($.getListItemDivider(message));
+		return ul;
+	}	
+});
 
 jQuery.extend({
 	getChecklistsHtml: function(data, selection) {
-		var ul = getUnorderedList();
-		var extractedDatetimes = extractDatetimesFromResultsData(data);
-		/* Set date for dividing list item and use the date collection to extract summary of checklist data for display */
+		var ul = $.getUnorderedList();
+		var extractedDatetimes = $.extractDatetimesFromResultsData(data);
 		var prevDate = "";
+		/* Set date for dividing list item and use the date collection to extract summary of checklist data for display */
 		for (var j = 0; j < extractedDatetimes.length; ++j) {
 			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
 			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
@@ -289,23 +231,27 @@ jQuery.extend({
 			
 			if (prevDate != date) {
 				//write out date heading.
-				ul.appendChild(getListItemDivider(date));				
+				ul.appendChild($.getListItemDivider(date));				
 				prevDate = date;
 			}
 
 			var innerHtml = count + " species @ " + location + " @ " + time;
-			ul.appendChild(getListItem(innerHtml));
+			ul.appendChild($.getListItem(innerHtml));
 		}
+		/* Set message */
+		var message = extractedDatetimes.length + " checklists with most recent species for " + selection + " in last 5 days.";
+		ul.insertBefore($.getListItemDivider(message), ul.childNodes[0]);
 		return ul;
 	}
 });
 
 jQuery.extend({
 	getNotablesHtml: function(data, selection) {
-		var ul = getUnorderedList();
-		var extractedDatetimes = extractDatetimesFromResultsData(data);
+		var ul = $.getUnorderedList();
+		var extractedDatetimes = $.extractDatetimesFromResultsData(data);
 		/* Set date for dividing list item and use the date collection to extract summary of checklist data for display */
 		var prevDate = "";
+		var speciesCount = 0;
 		for (var j = 0; j < extractedDatetimes.length; ++j) {
 			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
 			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
@@ -313,7 +259,7 @@ jQuery.extend({
 
 			if (prevDate != date) {
 				//write out date heading.
-				ul.appendChild(getListItemDivider(date));				
+				ul.appendChild($.getListItemDivider(date));				
 				prevDate = date;
 			}
 
@@ -323,20 +269,26 @@ jQuery.extend({
 	            var location = '<a href="#location" class="gotoLocation" title="' + checklist[k].locID + '" target="_self">' + checklist[k].locName + '</a>';
     			var timeOut = '<a href="https://ebird.org/ebird/view/checklist?subID=' + checklist[k].subID + '" target="_blank">' + time + '</a>';
 				var userName = checklist[k].userDisplayName;
+
 				var innerHtml = count + " " + species + " @ " + location + " @ " + timeOut + "<br> -- " + userName;
-				ul.appendChild(getListItem(innerHtml));
+				ul.appendChild($.getListItem(innerHtml));
+				speciesCount++;
 			}
 		}
-		return ul;		
+		/* Set message */
+		var message = speciesCount + " notable sightings for " + selection + " in last 5 days.";
+		ul.insertBefore($.getListItemDivider(message), ul.childNodes[0]);
+		return ul;
 	}
 });
 
 jQuery.extend({
-	getLocationHtml: function(data) {
-		var ul = getUnorderedList();
-		var extractedDatetimes = extractDatetimesFromResultsData(data);
+	getLocationHtml: function(data, locId) {
+		var ul = $.getUnorderedList();
+		var extractedDatetimes = $.extractDatetimesFromResultsData(data);
 		/* Set date for dividing list item and use the date collection to extract summary of checklist data for display */
 		var prevDate = "";
+		var speciesCount = 0;		
 		for (var j = 0; j < extractedDatetimes.length; ++j) {
 			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
 			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
@@ -344,7 +296,7 @@ jQuery.extend({
 
 			if (prevDate != date) {
 				//write out date heading.
-				ul.appendChild(getListItemDivider(date));				
+				ul.appendChild($.getListItemDivider(date));				
 				prevDate = date;
 			}
 
@@ -353,240 +305,45 @@ jQuery.extend({
 				var species = '<a href="#species" class="gotoSpecies" title="'+ checklist[k].comName + ' (' + checklist[k].sciName + ')' + '" target="_self">' + checklist[k].comName + '</a>';
     			var timeOut = '<a href="https://ebird.org/ebird/view/checklist?subID=' + checklist[k].subID + '" target="_blank">' + time + '</a>';
 	            var userName = checklist[k].userDisplayName;
+
 				var innerHtml = count + " " + species + " @ " + timeOut + "<br>-- " + userName;
-				ul.appendChild(getListItem(innerHtml));
+				ul.appendChild($.getListItem(innerHtml));
+				speciesCount++;
 			}
 		}
+		//var location = '<a href="https://ebird.org/ebird/view/checklist?subID=' + checklist[k].subID + '" target="_blank">' + time + '</a>';
+		/* Set message */
+		var message = speciesCount + " species at <a href='http://ebird.org/ebird/hotspot/'" + locId  + " target='_blank'>" + checklist[0].locName + "</a> in last 10 days.";
+		ul.insertBefore($.getListItemDivider(message), ul.childNodes[0]);
 		return ul;
 	}
 });
 
 jQuery.extend({
 	getSpeciesHtml: function(data, regName) {
-		var ul = getUnorderedList();
-		var extractedDatetimes = extractDatetimesFromResultsData(data);
-		
-		console.log("species data: ", data);
-		
+		var ul = $.getUnorderedList();
+		var extractedDatetimes = $.extractDatetimesFromResultsData(data);
 		/* Set date for dividing list item and use the date collection to extract summary of checklist data for display */
 		var prevDate = "";
 		for (var j = 0; j < extractedDatetimes.length; ++j) {
 			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
 			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
 			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j]));
-			var count = checklist.length;
+			var count = checklist[0].howMany;
 			var location = '<a href="#location" class="gotoLocation" title="' + checklist[0].locID + '" target="_self">' + checklist[0].locName + '</a>';
 			
 			if (prevDate != date) {
 				//write out date heading.
-				ul.appendChild(getListItemDivider(date));				
+				ul.appendChild($.getListItemDivider(date));				
 				prevDate = date;
 			}
 
 			var innerHtml = count + " @ " + location + " @ " + time;
-			ul.appendChild(getListItem(innerHtml));
+			ul.appendChild($.getListItem(innerHtml));
 		}
+		/* Set message */
+		var message = extractedDatetimes.length + ' sightings of <a href="https://duckduckgo.com/?q=' + checklist[0].comName + '&iax=1&ia=images" target="_blank">' + checklist[0].comName + '</a> in ' + regName + ' in last 10 days.';
+		ul.insertBefore($.getListItemDivider(message), ul.childNodes[0]);
 		return ul;
 	}	
 });
-
-// START: Get Tables.
-/*
-jQuery.extend({
-	buildTableHeaders: function(idName, className, heading1, heading2, heading3, heading4, heading5) {
-		var table = document.createElement("table");
-        table.setAttribute("id", idName);
-		table.setAttribute("class", className);
-        table.setAttribute("data-role", "table");
-        //table.setAttribute("data-mode", "columntoggle");
-
-		var thead = document.createElement('thead');
-		var tr = document.createElement('tr');
-		var th1 = document.createElement('th');
-		var th2 = document.createElement('th');
-
-		th1.innerHTML = heading1;
-		tr.appendChild(th1);
-		th2.innerHTML = heading2;
-		tr.appendChild(th2);
-
-        if (heading3 != "") {
-            var th3 = document.createElement('th');
-            th3.innerHTML = heading3;
-            tr.appendChild(th3);
-        }
-
-		if (heading4 != "") {
-            var th4 = document.createElement('th');
-            //th4.setAttribute("data-priority", "2");
-			th4.innerHTML = heading4;
-			tr.appendChild(th4);
-		}
-        if (heading5 != "") {
-            var th5 = document.createElement('th');
-            //th5.setAttribute("data-priority", "3");
-            th5.innerHTML = heading5;
-            tr.appendChild(th5);
-        }
-
-		thead.appendChild(tr);
-		table.appendChild(thead);
-
-		return table;
-	}
-});
-
-jQuery.extend({
-	buildTableCell: function(cellData, row) {
-		var cell = document.createElement('td');
-		cell.innerHTML = cellData;
-		row.appendChild(cell);
-		return row;
-	}
-});
-
-jQuery.extend({
-	getChecklistsTable: function(data, selection) {
-		var table = $.buildTableHeaders("submissionsTable", "tablesorter", "Hotspot", "Date", "Count*", "", "");
-		var tbody = document.createElement('tbody');
-
-		var speciesCount = 0;
-		var locNameDate = "";
-		var prevLocNameDate = data[0].locName + ";" + data[0].obsDt;
-
-		for (var i = 0; i < data.length; i++) {
-			locNameDate = data[i].locName + ";" + data[i].obsDt;
-
-			if (prevLocNameDate != locNameDate) {
-				// add new row, i.e., check-list.
-				var row = document.createElement('tr');
-
-				var locName = '<a href="#location" class="gotoLocation" title="' + data[i-1].locID + '" target="_self">' + data[i-1].locName + '</a>';
-				var howMany = speciesCount;
-        		var datetime = data[i-1].obsDt.replace(/-/g , "/");
-				var obsDt = $.formatDateTime('dd M hh:ii', new Date(datetime));
-
-				row = $.buildTableCell(locName, row);
-				row = $.buildTableCell(obsDt, row);
-				row = $.buildTableCell(howMany, row);
-
-				tbody.appendChild(row);
-
-				speciesCount = 0;
-				prevLocNameDate = locNameDate;
-			} else {
-				speciesCount++;
-			}
-		}
-		table.appendChild(tbody);
-
-		return table;
-	}
-});
-
-jQuery.extend({
-	getNotablesTable: function(data, selection) {
-		var table = $.buildTableHeaders("sightingsTable", "tablesorter", "Species", "Hotspot", "Count", "", "");
-		var tbody = document.createElement('tbody');
-        //var prevLocationDateTime = "";
-        //var prevSpeciesName = "";
-        var prevSubId = "";
-        //var observers = "";
-
-		for (var i = 0; i < data.length; i++) {
-			var row = document.createElement('tr');
-
-			var species = '<a href="#species" class="gotoSpecies" title="'+ data[i].comName + ' (' + data[i].sciName + ')' + '" target="_self">' + data[i].comName + '</a>';
-			//var obsDt = '<a href="http://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + data[i].obsDt + '</a>';
-			var howMany = data[i].howMany || 'X'; //ternary operator.
-            //var userName = data[i].userDisplayName;
-            var locName = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
-
-            // Show different checklists as a row.
-            if (prevSubId != data[i].subID) {
-                var datetime = data[i].obsDt.replace(/-/g , "/");
-                var submitted = '<a href="https://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + $.formatDateTime('dd M hh:ii', new Date(datetime)) + '</a> by ' + data[i].userDisplayName;
-                var submitRow = document.createElement('tr');
-                var cell = document.createElement('th');
-                cell.setAttribute("colspan", "3");
-                cell.setAttribute("class", "header");
-                cell.innerHTML = submitted;
-                submitRow.appendChild(cell);
-                tbody.appendChild(submitRow);
-                prevSubId = data[i].subID;
-            }
-            if (prevSubId == data[i].subID) {
-                row = $.buildTableCell(species, row);
-                row = $.buildTableCell(locName, row);
-                row = $.buildTableCell(howMany, row);
-            }
-
-			tbody.appendChild(row);
-		}
-		table.appendChild(tbody);
-		return table;
-	}
-});
-
-jQuery.extend({
-	getLocationTable: function(data) {
-		var table = $.buildTableHeaders("locationTable", "tablesorter", "Species", "Count", "", "", "");
-		var tbody = document.createElement('tbody');
-        var previousDate = "";
-
-		for (var i = 0; i < data.length; i++) {
-			var row = document.createElement('tr');
-
-			var species = '<a href="#species" class="gotoSpecies" title="'+ data[i].comName + ' (' + data[i].sciName + ')' + '" target="_self">' + data[i].comName + '</a>';
-			var howMany = data[i].howMany || 'X'; //ternary operator.
-			var obsDt = "";
-
-            // Show different visit dates as a row.
-            if (previousDate != data[i].obsDt) {
-                var datetime = data[i].obsDt.replace(/-/g , "/");
-                obsDt = '<a href="https://ebird.org/ebird/view/checklist?subID=' + data[i].subID + '" target="_blank">' + $.formatDateTime('dd M hh:ii', new Date(datetime)) + '</a> by ' + data[i].userDisplayName;
-                var dateRow = document.createElement('tr');
-                var cell = document.createElement('th');
-                cell.setAttribute("colspan", "2");
-                cell.setAttribute("class", "header");
-                cell.innerHTML = obsDt;
-                dateRow.appendChild(cell);
-                tbody.appendChild(dateRow);
-                previousDate = data[i].obsDt;
-            }
-			row = $.buildTableCell(species, row);
-			row = $.buildTableCell(howMany, row);
-
-			tbody.appendChild(row);
-		}
-
-		table.appendChild(tbody);
-		return table;
-	}
-});
-
-jQuery.extend({
-	getSpeciesTable: function(data, regName) {
-		var table = $.buildTableHeaders("speciesTable", "tablesorter", "Hotspot", "Date", "Count", "", "");
-		var tbody = document.createElement('tbody');
-
-		for (var i = 0; i < data.length; i++) {
-			var row = document.createElement('tr');
-
-			var location = '<a href="#location" class="gotoLocation" title="' + data[i].locID + '" target="_self">' + data[i].locName + '</a>';
-			var count = data[i].howMany || 'X';
-			var datetime = $.formatDateTime('dd M hh:ii', new Date(data[i].obsDt.replace(/-/g , "/")));
-
-			row = $.buildTableCell(location, row);
-			row = $.buildTableCell(datetime, row);
-			row = $.buildTableCell(count, row);
-
-			tbody.appendChild(row);
-		}
-
-		table.appendChild(tbody);
-		return table;
-	}
-});
-*/
-// END: Get Tables.

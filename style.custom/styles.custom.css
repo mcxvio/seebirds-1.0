@@ -27,7 +27,7 @@ div #info {
 /* Force content container with typeahead to expand to page min-height */
 #checklists .ui-content,
 #notables .ui-content {
-  border: 1px solid black;
+  /*border: 1px solid black;*/
   min-height: 80vh !important;
 }
 

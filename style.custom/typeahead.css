@@ -76,7 +76,6 @@ p + p {
 }
 
 .twitter-typeahead {
-  /*border: 1px solid red;*/
   height: inherit !important;
   width: 99% !important;
 }
@@ -160,7 +159,13 @@ p + p {
 
 #custom-templates .empty-message {
   padding: 5px 10px;
- text-align: center;
+  text-align: center;
+}
+
+.empty-message {  
+  text-align: left;
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 
 #multiple-datasets .league-name {
