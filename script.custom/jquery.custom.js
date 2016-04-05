@@ -166,10 +166,10 @@ jQuery.extend({
 		var lookup = {};
 		var items = data;
 		var result = [];
-		
+
 		for (var item, i = 0; item = items[i++];) {
 		  var name = item.obsDt;
-		
+
 		  if (!(name in lookup)) {
 		    lookup[name] = 1;
 		    result.push(name);
@@ -213,7 +213,7 @@ jQuery.extend({
 		var ul = $.getUnorderedList();
 		ul.appendChild($.getListItemDivider(message));
 		return ul;
-	}	
+	}
 });
 
 jQuery.extend({
@@ -225,13 +225,13 @@ jQuery.extend({
 		for (var j = 0; j < extractedDatetimes.length; ++j) {
 			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
 			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
-			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j])); 
+			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j].replace(/-/g , "/")));
 			var count = checklist.length;
 			var location = '<a href="#location" class="gotoLocation" title="' + checklist[0].locID + '" target="_self">' + checklist[0].locName + '</a>';
-			
+
 			if (prevDate != date) {
 				//write out date heading.
-				ul.appendChild($.getListItemDivider(date));				
+				ul.appendChild($.getListItemDivider(date));
 				prevDate = date;
 			}
 
@@ -255,11 +255,11 @@ jQuery.extend({
 		for (var j = 0; j < extractedDatetimes.length; ++j) {
 			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
 			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
-			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j]));
+			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j].replace(/-/g , "/")));
 
 			if (prevDate != date) {
 				//write out date heading.
-				ul.appendChild($.getListItemDivider(date));				
+				ul.appendChild($.getListItemDivider(date));
 				prevDate = date;
 			}
 
@@ -288,15 +288,15 @@ jQuery.extend({
 		var extractedDatetimes = $.extractDatetimesFromResultsData(data);
 		/* Set date for dividing list item and use the date collection to extract summary of checklist data for display */
 		var prevDate = "";
-		var speciesCount = 0;		
+		var speciesCount = 0;
 		for (var j = 0; j < extractedDatetimes.length; ++j) {
 			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
 			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
-			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j]));
+			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j].replace(/-/g , "/")));
 
 			if (prevDate != date) {
 				//write out date heading.
-				ul.appendChild($.getListItemDivider(date));				
+				ul.appendChild($.getListItemDivider(date));
 				prevDate = date;
 			}
 
@@ -328,13 +328,13 @@ jQuery.extend({
 		for (var j = 0; j < extractedDatetimes.length; ++j) {
 			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
 			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
-			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j]));
+			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j].replace(/-/g , "/")));
 			var count = checklist[0].howMany;
 			var location = '<a href="#location" class="gotoLocation" title="' + checklist[0].locID + '" target="_self">' + checklist[0].locName + '</a>';
-			
+
 			if (prevDate != date) {
 				//write out date heading.
-				ul.appendChild($.getListItemDivider(date));				
+				ul.appendChild($.getListItemDivider(date));
 				prevDate = date;
 			}
 
@@ -345,5 +345,5 @@ jQuery.extend({
 		var message = extractedDatetimes.length + ' sightings of <a href="https://duckduckgo.com/?q=' + checklist[0].comName + '&iax=1&ia=images" target="_blank">' + checklist[0].comName + '</a> in ' + regName + ' in last 10 days.';
 		ul.insertBefore($.getListItemDivider(message), ul.childNodes[0]);
 		return ul;
-	}	
+	}
 });
