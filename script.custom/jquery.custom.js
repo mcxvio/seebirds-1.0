@@ -329,7 +329,7 @@ jQuery.extend({
 			var checklist = data.filter(function(i, n) { return i.obsDt == extractedDatetimes[j]; });
 			var date = $.formatDateTime('dd-MM', new Date(extractedDatetimes[j].replace(/-/g , "/")));
 			var time = $.formatDateTime('hh:ii', new Date(extractedDatetimes[j].replace(/-/g , "/")));
-			var count = checklist[0].howMany;
+			var count = checklist[0].howMany || 'X'; //ternary operator.
 			var location = '<a href="#location" class="gotoLocation" title="' + checklist[0].locID + '" target="_self">' + checklist[0].locName + '</a>';
 
 			if (prevDate != date) {
