@@ -30,15 +30,6 @@
         
             var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" };
         
-            // Save selected region from autocomplete.
-            $(document).on("click", "a.gotoRegion", function() {
-                selectedData.region = $(this).text();
-            });
-        
-            $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
-                //var page = $(this).attr("id");
-            });
-            
             $(document).pagecontainer({ beforeshow: function(event, ui) { } });
             // Load results data.
             $(document).on("pagecontainerbeforeshow", function(event, ui){
@@ -82,6 +73,11 @@
                 }
             });
             
+            // Save selected region from autocomplete.
+            $(document).on("click", "a.gotoRegion", function() {
+                selectedData.region = $(this).text();
+            });
+
             // Load location data.
             $(document).on("click", "a.gotoLocation", function() {
                 selectedData.locId = $(this).attr('title');
