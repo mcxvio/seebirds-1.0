@@ -4,113 +4,90 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Hunt's eBirds</title>
-    <link rel="stylesheet" type="text/css" href="script.tablesorter/styles.tablesorter.css">
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="script.tablesorter/jquery.tablesorter.min.js"></script>
     <script src="script.custom/jquery.formatDateTime.min.js"></script>
     <script src="script.custom/jquery.custom.js"></script>
     <!-- jQM -->
     <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <!-- end jQM -->
+    <!-- Typeahead -->
+    <script src="script.custom/typeahead.bundle.js"></script>
+    <script src="script.custom/bloodhound.min.js"></script>
+    <script src="script.custom/prefetch.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.custom/typeahead.css">
+    <!-- end Typeahead -->
     <link rel="stylesheet" type="text/css" href="style.custom/styles.custom.css">
     <script>
-        //var urlBase = "http://huntsebirds.appspot.com/";
-        //var urlBase = "http://localhost:8080/";
-        var urlBase = "https://mebird-mrhapi.c9users.io/";
-        var dataFile = "data/region_usa_ma.xml";
-        var noDataFound = "No data found, please search again.";
+        var noDataFound = "No data found, please <a href='#' data-rel='back'>search again</a>.";
+        var selectMessageChecklists = "<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
+        var selectMessageNotables = "<a href='#nav-panel-notable-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
 
         (function( $ ) {
             $(function() { // On document ready
                 $.spinner();
             });
-
+        
             var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" };
-
-            // Load autocomplete values & handle selection.
-            $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
-                var page = $(this).attr("id");
-                if (page == "checklists" || page == "notables") {
-                    $.populateAutocompletes(page, urlBase, dataFile);
-                }
-                // Set current copyright year.
-                $(".copyrightYear").html($.getCurrentYear());
-            });
-
+        
             // Save selected region from autocomplete.
             $(document).on("click", "a.gotoRegion", function() {
                 selectedData.region = $(this).text();
             });
-
+        
+            $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
+                //var page = $(this).attr("id");
+            });
+            
             $(document).pagecontainer({ beforeshow: function(event, ui) { } });
             // Load results data.
             $(document).on("pagecontainerbeforeshow", function(event, ui){
+                // Set current copyright year.
+                $(".copyrightYear").html($.getCurrentYear());
+        
                 var toPage = ui.toPage[0].id;
                 var page = "#" + toPage;
                 var message = noDataFound;
-                var tableData = "";
-
-                //console.log("pagecontainerbeforeshow: " + toPage);
+                var data = "";
 
                 if (toPage == "submissions") {
                     if (selectedData.region.length > 0) {
-                        tableData = $.getTableData("checklistsResults", "checklistsRegion", selectedData.region, "checklists", "", "");
-
-                        if (tableData.table.rows.length > 0) {
-                            message = "Checklists with *count of species seen most recently in " + selectedData.region + ", in last 5 days: " + (tableData.table.rows.length-1) + ".";
-                        }
+                        data = $.getOutputHtml("checklistsResults", "checklistsRegion", selectedData.region, "checklists", "", "");
                     } else {
-                        message = "<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
+                        data = $.getSelectChecklistsNotablesMessage(selectMessageChecklists);
                     }
                 }
                 if (toPage == "sightings") {
                     if (selectedData.region.length > 0) {
-                        tableData = $.getTableData("notablesResults", "notablesRegion", selectedData.region, "notables", "", "");
-
-                        if (tableData.table.rows.length > 0) {
-                            message = "Notable species for " + selectedData.region + ", in last 5 days: " + tableData.data + ".";
-                        }
+                        data = $.getOutputHtml("notablesResults", "notablesRegion", selectedData.region, "notables", "", "");
                     } else {
-                        message = "<a href='#nav-panel-notable-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
+                        data = $.getSelectChecklistsNotablesMessage(selectMessageNotables);
                     }
                 }
                 if (toPage == "location") {
-                    tableData = $.getTableData("", "", "", "location", selectedData.locId);
-                    if (tableData.table.rows.length > 0) {
-                        message = 'Sightings at <a href="http://ebird.org/ebird/hotspot/' + selectedData.locId + '" target="_blank">' + selectedData.locName + '</a> in last 14 days: ' + tableData.data + '.';
+                    if (selectedData.locId != "") {
+                        data = $.getOutputHtml("", "", "", "location", selectedData.locId);
                     }
                 }
                 if (toPage == "species") {
-                    //console.log("selectedData,1: " + JSON.stringify(selectedData));
-                    //selectedData = $.populateIdentifySpecies(selectedData);
-                    //console.log("selectedData,2: " + JSON.stringify(selectedData));
-
                     if (selectedData.sciName != "") {
-                        tableData = $.getTableData("", "", selectedData.region, "species", "", selectedData.sciName);
-                        if (tableData.table.rows.length > 0) {
-                            var searchName = selectedData.comName.replace(/ /g , "+");
-                            message = 'Sightings of <a href="https://duckduckgo.com/?q=' + searchName + '&iax=1&ia=images" target="_blank">' + selectedData.comName + '</a> in ' + selectedData.region + ' in last 14 days: ' + tableData.data + '.';
-                        }
+                        data = $.getOutputHtml("", "", selectedData.region, "species", "", selectedData.sciName);
                     }
                 }
-                if (tableData != "" && tableData.table.rows.length > 1) {
+                if (data != "" || data.children > 1) {
                     $(page + " #message").html(message);
-                    $(page + " #results").html(tableData.table);
-                    //$(page + "Table").tablesorter(); //sorting, table name page plus 'Table'.
-                    //$(page + "Table").table(); //show/hide columns, table name page plus 'Table'.
+                    $(page + " #results").html(data);
                 } else if (message != "") {
-                    $(page + " #message").html(message);
-                    $(page + " #results").html("");
+                    $(page + " #results").html(message); // Show nothing found message.
                 }
             });
-
+            
             // Load location data.
             $(document).on("click", "a.gotoLocation", function() {
                 selectedData.locId = $(this).attr('title');
                 selectedData.locName = $(this).text();
             });
-
+        
             // Load species data.
             $(document).on("click", "a.gotoSpecies", function() {
                 var title = $(this).attr('title');
@@ -142,16 +119,16 @@
             <a href="#nav-panel-checklists" data-icon="bars" data-iconpos="notext">Menu</a>
             <h1><a href="index.html">home</a></h1>
         </div>
-        <div role="main" class="ui-content">
-            <!-- Autocomplete -->
-            <form class="ui-filterable"><input id="autocomplete-input-checklists" data-type="search" placeholder="Search for State or County" autofocus="autofocus"></form>
-            <ul id="autocomplete-items-checklists" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input-checklists"></ul>
+        <div role="main" class="ui-content" id="prefetch">
+            <!-- Typeahead -->
+            <input class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead"
+                placeholder="Search for State or County" type="search" data-role="none" autofocus />
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-checklists" data-display="overlay" data-position="left">
                 <ul data-role="listview">
-                <li><a href="#checklists" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
-                <li><a href="#checklists" id="gotoChecklists" class="ui-btn ui-btn-active">checklists</a></li>
-                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                    <li><a href="#checklists" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                    <li><a href="#checklists" id="gotoChecklists" class="ui-btn ui-btn-active">checklists</a></li>
+                    <li><a href="#notables" id="gotoNotables">notables</a></li>
                 </ul>
             </div>
         </div>
@@ -166,15 +143,14 @@
             <h1><a href="index.html">home</a></h1>
         </div>
         <div role="main" class="ui-content">
-            <div id="message"></div>
             <div id="results"></div>
-            <br />
+            <br /><br />
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-checklist-sightings" data-display="overlay" data-position="left">
                 <ul data-role="listview">
-                <li><a href="#submissions" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
-                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
-                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                    <li><a href="#submissions" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                    <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                    <li><a href="#notables" id="gotoNotables">notables</a></li>
                 </ul>
             </div>
         </div>
@@ -188,16 +164,19 @@
             <a href="#nav-panel-notables" data-icon="bars" data-iconpos="notext">Menu</a>
             <h1><a href="index.html">home</a></h1>
         </div>
-        <div data-role="main" class="ui-content">
+        <div data-role="main" class="ui-content" id="prefetch">
+            <!-- Typeahead -->
+            <input class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead"
+                placeholder="Search for State or County" type="search" data-role="none" autofocus />
             <!-- Autocomplete -->
-            <form class="ui-filterable"><input id="autocomplete-input-notables" data-type="search" placeholder="Search for State or County" autofocus="autofocus"></form>
-            <ul id="autocomplete-items-notables" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input-notables"></ul>
+            <!--<form class="ui-filterable"><input id="autocomplete-input-notables" data-type="search" placeholder="Search for State or County" autofocus="autofocus"></form>
+            <ul id="autocomplete-items-notables" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input-notables"></ul>-->
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-notables" data-display="overlay" data-position="left">
                 <ul data-role="listview">
-                <li><a href="#notables" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
-                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
-                <li><a href="#notables" id="gotoNotables" class="ui-btn ui-btn-active">notables</a></li>
+                    <li><a href="#notables" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                    <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                    <li><a href="#notables" id="gotoNotables" class="ui-btn ui-btn-active">notables</a></li>
                 </ul>
             </div>
         </div>
@@ -212,15 +191,14 @@
             <h1><a href="index.html">home</a></h1>
         </div>
         <div role="main" class="ui-content">
-            <div id="message"></div>
             <div id="results"></div>
-            <br />
+            <br><br>
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-notable-sightings" data-display="overlay" data-position="left">
                 <ul data-role="listview">
-                <li><a href="#sightings" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
-                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
-                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                    <li><a href="#sightings" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                    <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                    <li><a href="#notables" id="gotoNotables">notables</a></li>
                 </ul>
             </div>
         </div>
@@ -235,15 +213,14 @@
             <h1><a href="index.html">home</a></h1>
         </div>
         <div role="main" class="ui-content">
-            <div id="message"></div>
             <div id="results"></div>
-            <br />
+            <br><br>
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-location" data-display="overlay" data-position="left">
                 <ul data-role="listview">
-                <li><a href="#location" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
-                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
-                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                    <li><a href="#location" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                    <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                    <li><a href="#notables" id="gotoNotables">notables</a></li>
                 </ul>
             </div>
         </div>
@@ -258,15 +235,14 @@
             <h1><a href="index.html">home</a></h1>
         </div>
         <div role="main" class="ui-content">
-            <div id="message"></div>
             <div id="results"></div>
-            <br />
+            <br><br>
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-species" data-display="overlay" data-position="left">
                 <ul data-role="listview">
-                <li><a href="#species" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
-                <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
-                <li><a href="#notables" id="gotoNotables">notables</a></li>
+                    <li><a href="#species" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
+                    <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
+                    <li><a href="#notables" id="gotoNotables">notables</a></li>
                 </ul>
             </div>
         </div>

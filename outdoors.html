@@ -49,7 +49,9 @@
                         async: false,
                         success: function(data) {
                             if (data.length > 0) {
-                                visited += '<p>' + $.format.date(data[0].obsDt, "ddd, dd-MMM-yyyy") + '</p>';
+                                visited += '<p>&nbsp;&nbsp;&nbsp;' + $.format.date(data[0].obsDt, "ddd, dd-MMM-yyyy") + '</p>';
+                            } else {
+                                visited += '<p>&nbsp;</p>';
                             }
                         },
                         error: function(xhr, status, error) {
@@ -77,17 +79,18 @@
     <!-- Home -->
     <div data-role="page" id="home" data-title="my outdoors links">
         <div data-role="header" class="centerbox" data-id="site-header"><p>my outdoors links</p></div>
-        <div role="main" class="iu-content">
+        <div role="main" class="ui-content">
             <h2>Hotspots</h2>
             <ul data-role="listview">
-                <li><a href="http://ebird.org/ebird/hotspot/L209928" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Boston Public Garden, MA USA</a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L897808" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>McLaughlin Woods, MA USA</a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L207391" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Mt. Auburn Cemetery, MA USA</a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L1249718" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Olmsted Park, MA USA</a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L248222" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Olmsted Park--Leverett Pond, MA USA</a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L359383" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Olmsted Park--Ward's Pond, MA USA</a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L3609670" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Olmsted Park--Willow Pond, MA USA</a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L939078" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>Titchwell Marsh RSPB Reserve, Norfolk UK</a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L209928" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Boston Public Garden, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L897808" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>McLaughlin Woods, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L207391" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Mt. Auburn Cemetery, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L1249718" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Olmsted Park, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L248222" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Olmsted Park--Leverett Pond, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L359383" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Olmsted Park--Ward's Pond, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L3609670" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Olmsted Park--Willow Pond, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L939078" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Titchwell Marsh RSPB Reserve, Norfolk UK</h2></a></li>
+                <li>5 species @ <a href="#location" class="gotoLocation" title="L451787" target="_self">Forest Hills Cemetery</a> @ 16:40</li>
             </ul>
             <h2>Sightings</h2>
             <ul data-role="listview">
