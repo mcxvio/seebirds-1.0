@@ -1,10 +1,28 @@
-a[href^="http://"]:after, a[href^="https://"]:after {
+/*a[href^="http://"]:after, a[href^="https://"]:after {
     content: url(//upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png);
     margin: 0 0 0 5px;
+}*/
+.external {
+    background: url(//upload.wikimedia.org/wikipedia/commons/6/64/Icon_External_Link.png) center right no-repeat;
+    padding-right: 15px;
 }
+
+/**======== START HEADER ========**/
+#subpageHeader {
+    min-height: 40px;
+}
+#homeIcon {
+    position: absolute;
+    left: 47%;
+    top: -2px;
+}
+/**======== END HEADER ========**/
+/**======== START FOOTER ========**/
 .centerbox {
     margin: 0 auto;
     text-align: center;
+    padding-top: 20px;
+    font-size: 0.75em;
 }
 .copyright {
     font-size: 0.75em;
@@ -14,8 +32,10 @@ a[href^="http://"]:after, a[href^="https://"]:after {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 40px;
+    min-height: 40px;
 }
+/**======== END FOOTER ========**/
+/**======== START TYPEAHEAD ========**/
 div #title {
     font-size: 1.5em;
     font-weight: bold;
@@ -27,18 +47,70 @@ div #info {
 /* Force content container with typeahead to expand to page min-height */
 #checklists .ui-content,
 #notables .ui-content {
-  /*border: 1px solid black;*/
   min-height: 80vh !important;
 }
-
 .jqmobile-typeahead {
     padding: 0px 0px 0px 0px;
     margin-top: 0px;
     margin-bottom: 0px;    
 }
-
+/**======== END TYPEAHEAD ========**/
 .gotoRegion {
     margin-top: -1px;
     margin-bottom: 0px;
     text-align: left;
 }
+/**======== START IMAGE BACKGROUNDS ========**/
+/* Begin image display style overrides */
+.navLinkHome {
+    color: black !important;
+    text-decoration: none !important;
+    text-shadow: none !important;
+}
+
+.navImagePosition {
+    min-height: 20em;
+    padding: 1em 0 0 1em;
+}
+
+.checklistNavImage, #prefetch-checklists {
+    background: url(../data/IMG_20151121_4680.jpg);    
+    background-repeat: repeat-y;
+    background-position: center center;
+    background-attachment: scroll;
+    /*background-size: 1024px 100%;*/
+    background-size: cover;
+}
+/*.checklistNavImage {
+    min-height: 15em;
+    padding: 1em 0 0 1em;
+}*/
+
+.notablesNavImage, #prefetch-notables {
+    background: url(../data/IMG_20151121_4702.jpg);
+    background-repeat: repeat-y;
+    background-position: center center;
+    background-attachment: scroll;
+    /*background-size: 1024px 100%;*/
+    background-size: cover;
+}
+/*.notablesNavImage {
+    min-height: 15em;
+    padding: 1em 0 0 1em;
+}*/
+
+.settingsNavImage {
+    background: url(../data/IMG_20150517_2859.jpg);
+    background-repeat: repeat-y;
+    background-position: center center;
+    background-attachment: scroll;
+    background-size: cover;
+}
+
+.ui-page {
+    background: transparent;
+}
+.ui-content {
+    background: transparent;
+}
+/**======== END IMAGE BACKGROUNDS ========**/

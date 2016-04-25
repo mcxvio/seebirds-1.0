@@ -19,6 +19,7 @@
     <!-- end Typeahead -->
     <link rel="stylesheet" type="text/css" href="style.custom/styles.custom.css">
     <script>
+        var siteName = "murmuration";
         var noDataFound = "No data found, please <a href='#' data-rel='back'>search again</a>.";
         var selectMessageChecklists = "<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
         var selectMessageNotables = "<a href='#nav-panel-notable-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
@@ -30,19 +31,11 @@
         
             var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" };
         
-            // Save selected region from autocomplete.
-            $(document).on("click", "a.gotoRegion", function() {
-                selectedData.region = $(this).text();
-            });
-        
-            $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
-                //var page = $(this).attr("id");
-            });
-            
             $(document).pagecontainer({ beforeshow: function(event, ui) { } });
             // Load results data.
             $(document).on("pagecontainerbeforeshow", function(event, ui){
                 // Set current copyright year.
+                $(".siteName").html(siteName);
                 $(".copyrightYear").html($.getCurrentYear());
         
                 var toPage = ui.toPage[0].id;
@@ -82,6 +75,11 @@
                 }
             });
             
+            // Save selected region from autocomplete.
+            $(document).on("click", "a.gotoRegion", function() {
+                selectedData.region = $(this).text();
+            });
+
             // Load location data.
             $(document).on("click", "a.gotoLocation", function() {
                 selectedData.locId = $(this).attr('title');
@@ -102,27 +100,22 @@
 <body>
     <!-- Home -->
     <div data-role="page" id="home" data-title="home">
-        <div data-role="header" data-id="site-header" data-position="inline">
-            <h1><a href="index.html">home</a></h1>
-        </div>
-        <div role="main" class="iu-content">
-            <ul data-role="listview"><li><a id="gotoChecklists" href="#checklists">checklists</a></li>
-            <li><a id="gotoNotables" href="#notables">notables</a></li></ul>
-        </div>
-        <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
-        </div>
+        <div data-role="header" data-id="site-header" data-position="inline"><h1 class="siteName">#</h1></div>
+        <div class="ui-corner-all custom-corners"><a id="gotoChecklists" href="#checklists" class="navLinkHome"><div class="checklistNavImage navImagePosition">checklists</div></a></div>
+        <div class="ui-corner-all custom-corners"><a id="gotoNotables" href="#notables" class="navLinkHome"><div class="notablesNavImage navImagePosition">notables</div></a></div>
+        <div class="ui-corner-all custom-corners"><a href="#settings" class="navLinkHome"><div class="settingsNavImage navImagePosition">settings</div></a></div>
+        <div data-role="footer" class="centerbox">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank" data-role="none" class="external">eBird</a></div>
     </div>
     <!-- Checklists Search -->
     <div data-role="page" id="checklists" data-title="hunt's ebirds | checklists">
-        <div data-role="header" data-id="site-header">
-            <a href="#nav-panel-checklists" data-icon="bars" data-iconpos="notext">Menu</a>
-            <h1><a href="index.html">home</a></h1>
+        <div data-role="header" data-id="site-header" id="subpageHeader">
+            <a href="#nav-panel-checklists" data-icon="bars" data-iconpos="notext" class="ui-btn-left">Menu</a>
+            <a href="index.html" data-icon="home" data-iconpos="notext" id="homeIcon">Home</a>
+            <a href="#settings" data-icon="gear" data-iconpos="notext" class="ui-btn-right">Settings</a>
         </div>
-        <div role="main" class="ui-content" id="prefetch">
+        <div role="main" class="ui-content" id="prefetch-checklists">
             <!-- Typeahead -->
-            <input class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead"
-                placeholder="Search for State or County" type="search" data-role="none" autofocus />
+            <input class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead" placeholder="Search State or County" type="search" data-role="none" autofocus />
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-checklists" data-display="overlay" data-position="left">
                 <ul data-role="listview">
@@ -132,15 +125,14 @@
                 </ul>
             </div>
         </div>
-        <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a></p>
-        </div>
+        <div data-role="footer" class="centerbox">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank" data-role="none" class="external">eBird</a></div>
     </div>
     <!-- Checklists Submissions Results -->
     <div data-role="page" id="submissions" data-title="hunt's ebirds | sightings">
         <div data-role="header" data-id="site-header">
             <a href="#nav-panel-checklist-sightings" data-icon="bars" data-iconpos="notext">Menu</a>
-            <h1><a href="index.html">home</a></h1>
+            <h1 class="siteName">#</h1>
+            <a href="index.html" data-icon="home" data-iconpos="notext">Home</a>
         </div>
         <div role="main" class="ui-content">
             <div id="results"></div>
@@ -154,23 +146,18 @@
                 </ul>
             </div>
         </div>
-        <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
-        </div>
+        <div data-role="footer" class="centerbox">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank" data-role="none" class="external">eBird</a></div>
     </div>
     <!-- Notables Search -->
     <div data-role="page" id="notables" data-title="hunt's ebirds | notables">
         <div data-role="header" data-id="site-header">
             <a href="#nav-panel-notables" data-icon="bars" data-iconpos="notext">Menu</a>
-            <h1><a href="index.html">home</a></h1>
+            <h1 class="siteName">#</h1>
+            <a href="index.html" data-icon="home" data-iconpos="notext">Home</a>
         </div>
-        <div data-role="main" class="ui-content" id="prefetch">
+        <div data-role="main" class="ui-content" id="prefetch-notables">
             <!-- Typeahead -->
-            <input class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead"
-                placeholder="Search for State or County" type="search" data-role="none" autofocus />
-            <!-- Autocomplete -->
-            <!--<form class="ui-filterable"><input id="autocomplete-input-notables" data-type="search" placeholder="Search for State or County" autofocus="autofocus"></form>
-            <ul id="autocomplete-items-notables" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input-notables"></ul>-->
+            <input class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead" placeholder="Search State or County" type="search" data-role="none" autofocus />
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-notables" data-display="overlay" data-position="left">
                 <ul data-role="listview">
@@ -180,15 +167,14 @@
                 </ul>
             </div>
         </div>
-        <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
-        </div>
+        <div data-role="footer" class="centerbox">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank" data-role="none" class="external">eBird</a></div>
     </div>
     <!-- Notable Sightings Results -->
     <div data-role="page" id="sightings" data-title="hunt's ebirds | sightings">
         <div data-role="header" data-id="site-header">
             <a href="#nav-panel-notable-sightings" data-icon="bars" data-iconpos="notext">Menu</a>
-            <h1><a href="index.html">home</a></h1>
+            <h1 class="siteName">#</h1>
+            <a href="index.html" data-icon="home" data-iconpos="notext">Home</a>
         </div>
         <div role="main" class="ui-content">
             <div id="results"></div>
@@ -202,15 +188,14 @@
                 </ul>
             </div>
         </div>
-        <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
-        </div>
+        <div data-role="footer" class="centerbox">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank" data-role="none" class="external">eBird</a></div>
     </div>
     <!-- Location Results -->
     <div data-role="page" id="location" data-title="hunt's ebirds | location">
         <div data-role="header" data-id="site-header">
             <a href="#nav-panel-location" data-icon="bars" data-iconpos="notext">Menu</a>
-            <h1><a href="index.html">home</a></h1>
+            <h1 class="siteName">#</h1>
+            <a href="index.html" data-icon="home" data-iconpos="notext">Home</a>
         </div>
         <div role="main" class="ui-content">
             <div id="results"></div>
@@ -224,15 +209,14 @@
                 </ul>
             </div>
         </div>
-        <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
-        </div>
+        <div data-role="footer" class="centerbox">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank" data-role="none" class="external">eBird</a></div>
     </div>
     <!-- Species Results -->
     <div data-role="page" id="species" data-title="hunt's ebirds | species">
         <div data-role="header" data-id="site-header">
             <a href="#nav-panel-species" data-icon="bars" data-iconpos="notext">Menu</a>
-            <h1><a href="index.html">home</a></h1>
+            <h1 class="siteName">#</h1>
+            <a href="index.html" data-icon="home" data-iconpos="notext">Home</a>
         </div>
         <div role="main" class="ui-content">
             <div id="results"></div>
@@ -246,11 +230,17 @@
                 </ul>
             </div>
         </div>
-        <div data-role="footer" class="centerbox">
-            <p class="copyright">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank">eBird</a>
-        </div>
+        <div data-role="footer" class="centerbox">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank" data-role="none" class="external">eBird</a></div>
     </div>
-    <!-- Donate -> todo separate page -->
-    <!-- Providers -> todo separate page -->
+    <!-- Settings -->
+    <div data-role="page" id="settings" data-title="hunt's ebirds | settings">
+        <div data-role="header" data-id="site-header" id="subpageHeader"><a href="#nav-panel-checklists" data-icon="bars" data-iconpos="notext" class="ui-btn-left">Menu</a><a href="index.html" data-icon="home" data-iconpos="notext" id="homeIcon">Home</a><a href="#settings" data-icon="gear" data-iconpos="notext" class="ui-btn-right">Settings</a></div>
+        <div role="main" class="ui-content">About, attributions, select theme, etc.</div>
+        <div data-role="footer" class="centerbox">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank" data-role="none" class="external">eBird</a></div>
+    </div>
+    <!-- Donate -->
+    <div data-role="page" id="donate" data-title="hunt's ebirds | donate">
+        Support developer, eBird, etc.
+    </div>
 </body>
 </html>
