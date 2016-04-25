@@ -238,6 +238,7 @@ jQuery.extend({
 			var innerHtml = count + " species @ " + location + " @ " + time;
 			ul.appendChild($.getListItem(innerHtml));
 		}
+		ul.appendChild($.getListItem("&nbsp;"));
 		/* Set message */
 		var message = extractedDatetimes.length + " checklists with most recent species for " + selection + " in last 5 days.";
 		ul.insertBefore($.getListItemDivider(message), ul.childNodes[0]);
@@ -275,6 +276,7 @@ jQuery.extend({
 				speciesCount++;
 			}
 		}
+		ul.appendChild($.getListItem("&nbsp;"));		
 		/* Set message */
 		var message = speciesCount + " notable sightings for " + selection + " in last 5 days.";
 		ul.insertBefore($.getListItemDivider(message), ul.childNodes[0]);
@@ -311,9 +313,9 @@ jQuery.extend({
 				speciesCount++;
 			}
 		}
-		//var location = '<a href="https://ebird.org/ebird/view/checklist?subID=' + checklist[k].subID + '" target="_blank">' + time + '</a>';
+		ul.appendChild($.getListItem("&nbsp;"));
 		/* Set message */
-		var message = speciesCount + " species at <a href='http://ebird.org/ebird/hotspot/'" + locId  + " target='_blank'>" + checklist[0].locName + "</a> in last 10 days.";
+		var message = speciesCount + ' species at <a href="http://ebird.org/ebird/hotspot/' + locId  + '" target="_blank" class="external">' + checklist[0].locName + '</a> in last 10 days.';
 		ul.insertBefore($.getListItemDivider(message), ul.childNodes[0]);
 		return ul;
 	}
@@ -341,8 +343,9 @@ jQuery.extend({
 			var innerHtml = count + " @ " + location + " @ " + time;
 			ul.appendChild($.getListItem(innerHtml));
 		}
+		ul.appendChild($.getListItem("&nbsp;"));		
 		/* Set message */
-		var message = extractedDatetimes.length + ' sightings of <a href="https://duckduckgo.com/?q=' + checklist[0].comName + '&iax=1&ia=images" target="_blank">' + checklist[0].comName + '</a> in ' + regName + ' in last 10 days.';
+		var message = extractedDatetimes.length + ' sightings of <a href="https://duckduckgo.com/?q=' + checklist[0].comName + '&iax=1&ia=images" target="_blank" class="external">' + checklist[0].comName + '</a> in ' + regName + ' in last 10 days.';
 		ul.insertBefore($.getListItemDivider(message), ul.childNodes[0]);
 		return ul;
 	}

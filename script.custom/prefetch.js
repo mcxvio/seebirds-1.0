@@ -28,11 +28,11 @@ $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
         console.log("initialised :: ", page);
 
         // set the results pages
-        var typeaheadui = '#notables #prefetch .typeahead';
+        var typeaheadui = '#notables #prefetch-notables .typeahead';
         var gotoPage = '#sightings';
         
         if (page == 'checklists') {
-            typeaheadui = '#checklists #prefetch .typeahead';
+            typeaheadui = '#checklists #prefetch-checklists .typeahead';
             gotoPage = '#submissions';
         }
 
