@@ -34,6 +34,9 @@
     width: 100%;
     min-height: 40px;
 }
+#footerHome {
+    position: relative;
+}
 /**======== END FOOTER ========**/
 /**======== START TYPEAHEAD ========**/
 div #title {
@@ -47,7 +50,7 @@ div #info {
 /* Force content container with typeahead to expand to page min-height */
 #checklists .ui-content,
 #notables .ui-content {
-  min-height: 80vh !important;
+  min-height: 90vh !important;
 }
 .jqmobile-typeahead {
     padding: 0px 0px 0px 0px;
@@ -78,33 +81,26 @@ div #info {
     background-repeat: repeat-y;
     background-position: center center;
     background-attachment: scroll;
-    /*background-size: 1024px 100%;*/
     background-size: cover;
 }
-/*.checklistNavImage {
-    min-height: 15em;
-    padding: 1em 0 0 1em;
-}*/
 
 .notablesNavImage, #prefetch-notables {
     background: url(../data/IMG_20151121_4702.jpg);
     background-repeat: repeat-y;
     background-position: center center;
     background-attachment: scroll;
-    /*background-size: 1024px 100%;*/
     background-size: cover;
 }
-/*.notablesNavImage {
-    min-height: 15em;
-    padding: 1em 0 0 1em;
-}*/
 
-.settingsNavImage {
+.settingsNavImage, #main-settings {
     background: url(../data/IMG_20150517_2859.jpg);
     background-repeat: repeat-y;
     background-position: center center;
     background-attachment: scroll;
     background-size: cover;
+}
+#settings .ui-content {
+  min-height: 90vh !important;    
 }
 
 .ui-page {
