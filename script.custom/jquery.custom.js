@@ -1,3 +1,4 @@
+var jQuery;
 jQuery.extend({
 	getCurrentYear: function() {
 		return new Date().getFullYear();
@@ -202,7 +203,7 @@ jQuery.extend({
 		var lid = document.createElement('li');
 		lid.setAttribute("data-role", "list-divider");
 		lid.setAttribute("role", "heading");
-		lid.setAttribute("class", "ui-li-divider ui-bar-a");
+		lid.setAttribute("class", "ui-li-divider ui-body-inherit");		
 		lid.innerHTML = innerHtml;
 		return lid;
 	}

@@ -72,12 +72,12 @@ div #info {
 }
 
 .navImagePosition {
-    min-height: 20em;
+    height: 65vh;
     padding: 1em 0 0 1em;
 }
 
 .checklistNavImage, #prefetch-checklists {
-    background: url(../data/IMG_20151121_4680.jpg);    
+    background: url(../data/IMG_20150517_2859.jpg);
     background-repeat: repeat-y;
     background-position: center center;
     background-attachment: scroll;
@@ -93,7 +93,7 @@ div #info {
 }
 
 .settingsNavImage, #main-settings {
-    background: url(../data/IMG_20150517_2859.jpg);
+    background: url(../data/IMG_20151121_4680.jpg);
     background-repeat: repeat-y;
     background-position: center center;
     background-attachment: scroll;

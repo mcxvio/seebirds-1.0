@@ -10,6 +10,7 @@
     <!-- jQM -->
     <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <link rel="stylesheet" href="//demos.jquerymobile.com/1.4.5/css/themes/default/jquery.mobile-1.4.5.min.css">
     <!-- end jQM -->
     <!-- Typeahead -->
     <script src="script.custom/typeahead.bundle.js"></script>
@@ -28,9 +29,24 @@
             $(function() { // On document ready
                 $.spinner();
             });
+
+    		$( document ).on( "pagecreate", function() {
+    			$( "#theme-selector input" ).on( "change", function( event ) {
+    				var themeClass = $( "#theme-selector input:checked" ).attr( "id" );
+    				$( "#home" ).removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
+    				$( "#checklists" ).removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
+    				$( "#submissions" ).removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
+    				$( "#notables" ).removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
+    				$( "#sightings" ).removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
+    				$( "#location" ).removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
+    				$( "#species" ).removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
+    				$( "#settings" ).removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
+    				$( ".theme" ).text( themeClass );
+    			});
+    		});
         
             var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" };
-        
+
             $(document).pagecontainer({ beforeshow: function(event, ui) { } });
             // Load results data.
             $(document).on("pagecontainerbeforeshow", function(event, ui){
@@ -122,6 +138,7 @@
                     <li><a href="#checklists" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
                     <li><a href="#checklists" id="gotoChecklists" class="ui-btn ui-btn-active">checklists</a></li>
                     <li><a href="#notables" id="gotoNotables">notables</a></li>
+                    <li><a href="#settings">settings</a></li>
                 </ul>
             </div>
         </div>
@@ -143,6 +160,7 @@
                     <li><a href="#submissions" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
                     <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
                     <li><a href="#notables" id="gotoNotables">notables</a></li>
+                    <li><a href="#settings">settings</a></li>                    
                 </ul>
             </div>
         </div>
@@ -164,6 +182,7 @@
                     <li><a href="#notables" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
                     <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
                     <li><a href="#notables" id="gotoNotables" class="ui-btn ui-btn-active">notables</a></li>
+                    <li><a href="#settings">settings</a></li>
                 </ul>
             </div>
         </div>
@@ -185,6 +204,7 @@
                     <li><a href="#sightings" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
                     <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
                     <li><a href="#notables" id="gotoNotables">notables</a></li>
+                    <li><a href="#settings">settings</a></li>
                 </ul>
             </div>
         </div>
@@ -206,6 +226,7 @@
                     <li><a href="#location" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
                     <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
                     <li><a href="#notables" id="gotoNotables">notables</a></li>
+                    <li><a href="#settings">settings</a></li>
                 </ul>
             </div>
         </div>
@@ -227,6 +248,7 @@
                     <li><a href="#species" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
                     <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
                     <li><a href="#notables" id="gotoNotables">notables</a></li>
+                    <li><a href="#settings">settings</a></li>
                 </ul>
             </div>
         </div>
@@ -236,21 +258,46 @@
     <div data-role="page" id="settings" data-title="hunt's ebirds | settings">
         <div data-role="header" data-id="site-header" id="subpageHeader"><a href="#nav-panel-settings" data-icon="bars" data-iconpos="notext" class="ui-btn-left">Menu</a><a href="index.html" data-icon="home" data-iconpos="notext" id="homeIcon">Home</a><a href="#settings" data-icon="gear" data-iconpos="notext" class="ui-btn-right">Settings</a></div>
         <div role="main" class="ui-content" id="main-settings">
-            About, attributions, select theme, etc.
+    		<h3>Preferences</h3>
+    		<form class="ui-mini">
+    			<div class="ui-field-contain" id="theme-selector">
+    				<fieldset data-role="controlgroup" data-type="horizontal">
+    					<legend>Select Site's Theme:</legend>
+    					<label for="a">A</label>
+    					<input type="radio" name="theme" id="a" checked>
+    					<label for="b">B</label>
+    					<input type="radio" name="theme" id="b">
+    				</fieldset>
+    			</div>
+    		</form>
+    		<h3>Providers</h3>
+    		<div class="ui-field-contain">
+                <fieldset data-role="controlgroup" data-type="horizontal">
+                    <legend>&nbsp;All data provided by <a href="http://www.ebird.org" class="external">eBird</a></legend>
+                    <a href="https://join.birds.cornell.edu/ea-action/action?ea.client.id=1806&#038;ea.campaign.id=39939&#038;" id="" target="_self" class="widget_sp_image-image-link" title="Donate Now" rel="" target="_blank">
+                        <img width="175" height="55" alt="Donate Now" src="data/ebird_button_donate.png" />
+                    </a>
+                </fieldset>
+    		</div>
+    		<div class="ui-field-contain">
+                <fieldset data-role="controlgroup" data-type="horizontal">
+    		        <legend>Powered by <a href="http://jquerymobile.com" class="external">jQuery Mobile</a></legend>
+    		        <a href="https://jquery.org/donate/" target="_blank">
+    		            <button class="ui-btn ui-shadow ui-corner-all ui-btn-icon-right ui-icon-arrow-u-r">Donate Now</button>
+    		        </a>
+                </fieldset>
+    		</div>
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-settings" data-display="overlay" data-position="left">
                 <ul data-role="listview">
                     <li><a href="#settings" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
                     <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
                     <li><a href="#notables" id="gotoNotables">notables</a></li>
+                    <li><a href="#settings" class="ui-btn ui-btn-active">settings</a></li>
                 </ul>
             </div>
         </div>
         <div data-role="footer" class="centerbox">&copy <span class="copyrightYear"></span> M Hunt. Data by <a href="http://www.ebird.org" target="_blank" data-role="none" class="external">eBird</a></div>
-    </div>
-    <!-- Donate -->
-    <div data-role="page" id="donate" data-title="hunt's ebirds | donate">
-        Support developer, eBird, etc.
     </div>
 </body>
 </html>
