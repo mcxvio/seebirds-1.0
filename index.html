@@ -20,7 +20,7 @@
     <!-- end Typeahead -->
     <link rel="stylesheet" type="text/css" href="style.custom/styles.custom.css">
     <script>
-        var siteName = "murmuration";
+        var siteName = "mebird";
         var noDataFound = "No data found, please <a href='#' data-rel='back'>search again</a>.";
         var selectMessageChecklists = "<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
         var selectMessageNotables = "<a href='#nav-panel-notable-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
@@ -41,6 +41,7 @@
     				$( "#location" ).removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
     				$( "#species" ).removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
     				$( "#settings" ).removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
+    				$( "#prefetch-checklists").removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
     				$( ".theme" ).text( themeClass );
     			});
     		});
@@ -59,6 +60,12 @@
                 var message = noDataFound;
                 var data = "";
 
+                if (toPage == "checklists") {
+                    $.removeTypeaheadBgColorStyle("typeahead-checklists");
+                }
+                if (toPage == "notables") {
+                    $.removeTypeaheadBgColorStyle("typeahead-notables");
+                }
                 if (toPage == "submissions") {
                     if (selectedData.region.length > 0) {
                         data = $.getOutputHtml("checklistsResults", "checklistsRegion", selectedData.region, "checklists", "", "");
@@ -131,7 +138,7 @@
         </div>
         <div role="main" class="ui-content" id="prefetch-checklists">
             <!-- Typeahead -->
-            <input class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead" placeholder="Search State or County" type="search" data-role="none" autofocus />
+            <input class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead" placeholder="Search State or County" type="search" data-role="none" autofocus id="typeahead-checklists" />
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-checklists" data-display="overlay" data-position="left">
                 <ul data-role="listview">
@@ -175,7 +182,7 @@
         </div>
         <div data-role="main" class="ui-content" id="prefetch-notables">
             <!-- Typeahead -->
-            <input class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead" placeholder="Search State or County" type="search" data-role="none" autofocus />
+            <input class="ui-input-search ui-body-inherit ui-corner-all ui-shadow-inset ui-input-has-clear typeahead" placeholder="Search State or County" type="search" data-role="none" autofocus id="typeahead-notables" />
             <!-- Nav Panel -->
             <div data-role="panel" id="nav-panel-notables" data-display="overlay" data-position="left">
                 <ul data-role="listview">

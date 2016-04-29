@@ -26,7 +26,24 @@ jQuery.extend({
 			$.mobile.loading( "hide" );
 		});
 	}
-})
+});
+
+jQuery.extend({
+	removeTypeaheadBgColorStyle: function(elementId) {
+		if((document.getElementById) && (document.getElementById(elementId) != null)) {
+			var element = document.getElementById(elementId);
+			// Check the element's style object and background property are available.
+		 	if ((element.style)&& (element.style.backgroundColor != null)) {
+                element.style.backgroundColor = null;
+  			}else {	
+				// Property is not assigned or is not supported.
+				return;
+  			}
+		} else {
+		  return;
+		}
+	}
+});
 
 jQuery.extend({
 	//http://stackoverflow.com/questions/905298/jquery-storing-ajax-response-into-global-variable
