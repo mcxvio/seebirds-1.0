@@ -7,10 +7,11 @@
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="script.custom/jquery.formatDateTime.min.js"></script>
     <script src="script.custom/jquery.custom.js"></script>
+    <script src="script.custom/plugin.js"></script>
     <!-- jQM -->
     <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-    <link rel="stylesheet" href="//demos.jquerymobile.com/1.4.5/css/themes/default/jquery.mobile-1.4.5.min.css">
+    <link rel="stylesheet" href="style.custom/themes/jquery.mobile-1.4.5.min.css">
     <!-- end jQM -->
     <!-- Typeahead -->
     <script src="script.custom/typeahead.bundle.js"></script>
@@ -22,8 +23,8 @@
     <script>
         var siteName = "seebirds";
         var noDataFound = "No data found, please <a href='#' data-rel='back'>search again</a>.";
-        var selectMessageChecklists = "<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
-        var selectMessageNotables = "<a href='#nav-panel-notable-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
+        var selectMessageChecklistSubmissions = "<a href='#nav-panel-checklist-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
+        var selectMessageNotableSightings = "<a href='#nav-panel-notable-sightings'>Select</a> from Checklists or Notables to search State or County sightings.";
 
         (function( $ ) {
             $(function() { // On document ready
@@ -53,7 +54,7 @@
             $(document).on("pagecontainerbeforeshow", function(event, ui){
                 // Set current copyright year.
                 $(".siteName").html(siteName);
-                $(".copyrightYear").html($.getCurrentYear());
+                $(".copyrightYear").html(new Date().getFullYear());
         
                 var toPage = ui.toPage[0].id;
                 var page = "#" + toPage;
@@ -61,34 +62,22 @@
                 var data = "";
 
                 if (toPage == "checklists") {
-                    $.removeTypeaheadBgColorStyle("typeahead-checklists");
+                    //$.removeTypeaheadBgColorStyle("typeahead-checklists");
                 }
                 if (toPage == "notables") {
-                    $.removeTypeaheadBgColorStyle("typeahead-notables");
+                    removeTypeaheadBgColorStyle("typeahead-notables");
                 }
                 if (toPage == "submissions") {
-                    if (selectedData.region.length > 0) {
-                        data = $.getOutputHtml("checklistsResults", "checklistsRegion", selectedData.region, "checklists", "", "");
-                    } else {
-                        data = $.getSelectChecklistsNotablesMessage(selectMessageChecklists);
-                    }
+                    data = getChecklistSubmissions(selectedData.region, selectMessageChecklistSubmissions);
                 }
                 if (toPage == "sightings") {
-                    if (selectedData.region.length > 0) {
-                        data = $.getOutputHtml("notablesResults", "notablesRegion", selectedData.region, "notables", "", "");
-                    } else {
-                        data = $.getSelectChecklistsNotablesMessage(selectMessageNotables);
-                    }
+                    data = getNotableSightings(selectedData.region, selectMessageNotableSightings);
                 }
                 if (toPage == "location") {
-                    if (selectedData.locId != "") {
-                        data = $.getOutputHtml("", "", "", "location", selectedData.locId);
-                    }
+                    data = getLocationSubmissions(selectedData.locId);
                 }
                 if (toPage == "species") {
-                    if (selectedData.sciName != "") {
-                        data = $.getOutputHtml("", "", selectedData.region, "species", "", selectedData.sciName);
-                    }
+                    data = getSpeciesSightings(selectedData.region, selectedData.sciName);
                 }
                 if (data != "" || data.children > 1) {
                     $(page + " #message").html(message);
@@ -112,7 +101,7 @@
             // Load species data.
             $(document).on("click", "a.gotoSpecies", function() {
                 var title = $(this).attr('title');
-                var sciName = $.getSubRegionFromSelection(title);
+                var sciName = getSubRegionFromSelection(title);
                 var comName = title.substring(0, title.indexOf('(')-1);
                 selectedData.sciName = sciName;
                 selectedData.comName = comName;
@@ -270,9 +259,9 @@
     			<div class="ui-field-contain" id="theme-selector">
     				<fieldset data-role="controlgroup" data-type="horizontal">
     					<legend>Select Site's Theme:</legend>
-    					<label for="a">A</label>
+    					<label for="a">Light</label>
     					<input type="radio" name="theme" id="a" checked>
-    					<label for="b">B</label>
+    					<label for="b">Dark</label>
     					<input type="radio" name="theme" id="b">
     				</fieldset>
     			</div>
@@ -280,7 +269,7 @@
     		<h3>Providers</h3>
     		<div class="ui-field-contain">
                 <fieldset data-role="controlgroup" data-type="horizontal">
-                    <legend>&nbsp;All data provided by <a href="http://www.ebird.org" class="external">eBird</a></legend>
+                    <legend>&nbsp;Data provided by <a href="http://www.ebird.org" class="external">eBird</a></legend>
                     <a href="https://join.birds.cornell.edu/ea-action/action?ea.client.id=1806&#038;ea.campaign.id=39939&#038;" id="" target="_self" class="widget_sp_image-image-link" title="Donate Now" rel="" target="_blank">
                         <img width="175" height="55" alt="Donate Now" src="data/ebird_button_donate.png" />
                     </a>
@@ -291,6 +280,14 @@
     		        <legend>Powered by <a href="http://jquerymobile.com" class="external">jQuery Mobile</a></legend>
     		        <a href="https://jquery.org/donate/" target="_blank">
     		            <button class="ui-btn ui-shadow ui-corner-all ui-btn-icon-right ui-icon-arrow-u-r">Donate Now</button>
+    		        </a>
+                </fieldset>
+    		</div>
+    		<div class="ui-field-contain">
+                <fieldset data-role="controlgroup" data-type="horizontal">
+    		        <legend>Integrated to <a href="https://twitter.com/typeahead" class="external">typeahead.js</a></legend>
+    		        <a href="https://twitter.com/typeahead" target="_blank">
+    		            <img height="55" alt="typeahead" src="data/typeahead.gif" />
     		        </a>
                 </fieldset>
     		</div>
