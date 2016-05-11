@@ -1,3 +1,15 @@
+import webapp2
+
+class MainPage(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/html'
+        self.response.write('<a href="index.html">Search</a>')
+
+app = webapp2.WSGIApplication([
+    ('/', MainPage),
+], debug=True)
+
+'''
 #http://stackoverflow.com/questions/7646657/writing-response-body-with-basehttprequesthandler
 import SimpleHTTPServer
 import BaseHTTPServer
@@ -30,16 +42,4 @@ try:
 except KeyboardInterrupt:
     print('^C received, shutting down server')
     server.socket.close()
-
-'''
-import webapp2
-
-class MainPage(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/html'
-        self.response.write('<a href="index.html">Search</a>')
-
-app = webapp2.WSGIApplication([
-    ('/', MainPage),
-], debug=True)
 '''
