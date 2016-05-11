@@ -25,7 +25,7 @@ $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
     	    
         // initialize the bloodhound suggestion engine
         items.initialize();
-        console.log("initialised :: ", page);
+        //console.log("initialised :: ", page);
 
         // set the results pages
         var typeaheadui = '#notables #prefetch-notables .typeahead';

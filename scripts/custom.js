@@ -61,15 +61,20 @@ function getSpeciesSightingsUrl(region, scientificName) {
 // Process data as HTML unordered list.
 function getChecklistSubmissions(region, message) {
     if (region.length == 0) {
-        return getSelectChecklistsNotablesMessage(message);
+        return formatResponseMessage(message);
     }
-	
+    
+	var output = "";
 	var url = getChecklistSubmissionUrl(region);
 	var data = $.getValues(url, "json");
-	var output = "";
 	
     if (data.length > 0) {
-        output = getChecklistsHtml(data, region);
+		if (data.indexOf("errorMsg") > 0) {
+			var errorMsg = extractErrorMessage(data);
+			output = formatResponseMessage(errorMsg);
+		} else {
+	        output = getChecklistsHtml(data, region);
+		}
     }
 
     return output;
@@ -77,15 +82,20 @@ function getChecklistSubmissions(region, message) {
 
 function getNotableSightings(region, message) {
     if (region.length == 0) {
-        return getSelectChecklistsNotablesMessage(message);
+        return formatResponseMessage(message);
     }
 	
+	var output = "";
 	var url = getNotableSightingsUrl(region);
 	var data = $.getValues(url, "json");
-	var output = "";
-	
+
     if (data.length > 0) {
-        output = getNotablesHtml(data, region);
+		if (data.indexOf("errorMsg") > 0) {
+			var errorMsg = extractErrorMessage(data);
+			output = formatResponseMessage(errorMsg);
+		} else {
+        	output = getNotablesHtml(data, region);
+		}
     }
 
     return output;
@@ -96,12 +106,17 @@ function getLocationSubmissions(locationId) {
 		return "";
 	}
 	
+	var output = "";
 	var url = getLocationSubmissionsUrl(locationId);
 	var data = $.getValues(url, "json");
-	var output = "";
-	
+
     if (data.length > 0) {
-        output = getLocationHtml(data, locationId);
+		if (data.indexOf("errorMsg") > 0) {
+			var errorMsg = extractErrorMessage(data);
+			output = formatResponseMessage(errorMsg);
+		} else {
+	        output = getLocationHtml(data, locationId);
+		}
     }
 
 	return output;
@@ -112,15 +127,24 @@ function getSpeciesSightings(region, scientificName) {
 		return "";
 	}
 	
+	var output = "";
 	var url = getSpeciesSightingsUrl(region, scientificName);
 	var data = $.getValues(url, "json");
-	var output = "";
 	
     if (data.length > 0) {
-        output = getSpeciesHtml(data, scientificName);
+		if (data.indexOf("errorMsg") > 0) {
+			var errorMsg = extractErrorMessage(data);
+			output = formatResponseMessage(errorMsg);
+		} else {
+	        output = getSpeciesHtml(data, region);
+		}
     }
 
 	return output;
+}
+
+function extractErrorMessage(data) {
+	return data.slice(data.indexOf('errorMsg":"')+11, data.indexOf('"}]'));
 }
 
 function extractDatetimesFromResultsData(data) {
@@ -166,7 +190,7 @@ function getListItemDivider(innerHtml) {
 	return lid;
 }
 
-function getSelectChecklistsNotablesMessage(message) {
+function formatResponseMessage(message) {
 	var ul = getUnorderedList();
 	ul.appendChild(getListItemDivider(message));
 	return ul;
@@ -277,7 +301,7 @@ function getLocationHtml(data, locId) {
 	return ul;
 }
 
-function getSpeciesHtml(data, regName) {
+function getSpeciesHtml(data, region) {
 	var ul = getUnorderedList();
 	var extractedDatetimes = extractDatetimesFromResultsData(data);
 	/* Set date for dividing list item and use the date collection to extract summary of checklist data for display */
@@ -302,7 +326,7 @@ function getSpeciesHtml(data, regName) {
 	}
 	ul.appendChild(getListItem("&nbsp;"));		
 	/* Set message */
-	var message = extractedDatetimes.length + ' sightings of <a href="https://duckduckgo.com/?q=' + checklist[0].comName + '&iax=1&ia=images" target="_blank" class="external">' + checklist[0].comName + '</a> in ' + regName + ' in last 10 days.';
+	var message = extractedDatetimes.length + ' sightings of <a href="https://duckduckgo.com/?q=' + checklist[0].comName + '&iax=1&ia=images" target="_blank" class="external">' + checklist[0].comName + '</a> in ' + region + ' in last 10 days.';
 	ul.insertBefore(getListItemDivider(message), ul.childNodes[0]);
 	return ul;
 }

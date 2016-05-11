@@ -5,21 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Hunt's eBirds</title>
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="script.custom/jquery.formatDateTime.min.js"></script>
-    <script src="script.custom/jquery.custom.js"></script>
-    <script src="script.custom/plugin.js"></script>
+    <script src="scripts/jquery.formatDateTime.min.js"></script>
+    <script src="scripts/custom.js"></script>
+    <script src="scripts/plugin.js"></script>
     <!-- jQM -->
     <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-    <link rel="stylesheet" href="style.custom/themes/jquery.mobile-1.4.5.min.css">
+    <link rel="stylesheet" href="styles/themes/jquery.mobile-1.4.5.min.css">
     <!-- end jQM -->
     <!-- Typeahead -->
-    <script src="script.custom/typeahead.bundle.js"></script>
-    <script src="script.custom/bloodhound.min.js"></script>
-    <script src="script.custom/prefetch.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.custom/typeahead.css">
+    <script src="scripts/typeahead.bundle.js"></script>
+    <script src="scripts/bloodhound.min.js"></script>
+    <script src="scripts/prefetch.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles/typeahead.css">
     <!-- end Typeahead -->
-    <link rel="stylesheet" type="text/css" href="style.custom/styles.custom.css">
+    <link rel="stylesheet" type="text/css" href="styles/custom.css">
     <script>
         var siteName = "seebirds";
         var noDataFound = "No data found, please <a href='#' data-rel='back'>search again</a>.";
@@ -62,10 +62,10 @@
                 var data = "";
 
                 if (toPage == "checklists") {
-                    //$.removeTypeaheadBgColorStyle("typeahead-checklists");
+                    //removeTypeaheadBgColorStyle("typeahead-checklists");
                 }
                 if (toPage == "notables") {
-                    removeTypeaheadBgColorStyle("typeahead-notables");
+                    //removeTypeaheadBgColorStyle("typeahead-notables");
                 }
                 if (toPage == "submissions") {
                     data = getChecklistSubmissions(selectedData.region, selectMessageChecklistSubmissions);
@@ -77,13 +77,15 @@
                     data = getLocationSubmissions(selectedData.locId);
                 }
                 if (toPage == "species") {
-                    data = getSpeciesSightings(selectedData.region, selectedData.sciName);
+                    if (selectedData.region != "") {
+                        data = getSpeciesSightings(selectedData.region, selectedData.sciName);
+                    }
                 }
                 if (data != "" || data.children > 1) {
                     $(page + " #message").html(message);
                     $(page + " #results").html(data);
                 } else if (message != "") {
-                    $(page + " #results").html(message); // Show nothing found message.
+                    $(page + " #results").html(formatResponseMessage(message)); // Show nothing found message.
                 }
             });
             
@@ -271,24 +273,20 @@
                 <fieldset data-role="controlgroup" data-type="horizontal">
                     <legend>&nbsp;Data provided by <a href="http://www.ebird.org" class="external">eBird</a></legend>
                     <a href="https://join.birds.cornell.edu/ea-action/action?ea.client.id=1806&#038;ea.campaign.id=39939&#038;" id="" target="_self" class="widget_sp_image-image-link" title="Donate Now" rel="" target="_blank">
-                        <img width="175" height="55" alt="Donate Now" src="data/ebird_button_donate.png" />
+                        <img width="175" height="55" alt="Donate Now" src="images/ebird_button_donate.png" />
                     </a>
                 </fieldset>
     		</div>
     		<div class="ui-field-contain">
                 <fieldset data-role="controlgroup" data-type="horizontal">
     		        <legend>Powered by <a href="http://jquerymobile.com" class="external">jQuery Mobile</a></legend>
-    		        <a href="https://jquery.org/donate/" target="_blank">
-    		            <button class="ui-btn ui-shadow ui-corner-all ui-btn-icon-right ui-icon-arrow-u-r">Donate Now</button>
-    		        </a>
+    		        <a href="https://jquery.org/donate/" target="_blank"><button class="ui-btn ui-shadow ui-corner-all ui-btn-icon-right ui-icon-arrow-u-r">Donate Now</button></a>
                 </fieldset>
     		</div>
     		<div class="ui-field-contain">
                 <fieldset data-role="controlgroup" data-type="horizontal">
     		        <legend>Integrated to <a href="https://twitter.com/typeahead" class="external">typeahead.js</a></legend>
-    		        <a href="https://twitter.com/typeahead" target="_blank">
-    		            <img height="55" alt="typeahead" src="data/typeahead.gif" />
-    		        </a>
+    		        <a href="https://twitter.com/typeahead" target="_blank"><img height="55" alt="typeahead" src="images/typeahead.gif" /></a>
                 </fieldset>
     		</div>
             <!-- Nav Panel -->

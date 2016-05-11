@@ -25,6 +25,7 @@ jQuery.extend({
 	//http://stackoverflow.com/questions/905298/jquery-storing-ajax-response-into-global-variable
 	getValues: function(url, dataType) {
 		var result = null;
+		
 		$.ajax({
 			url: url,
 			type: 'get',
@@ -34,9 +35,14 @@ jQuery.extend({
 				result = data;
 			},
 			error: function(xhr, status, error) {
-				alert(error);
+				/*console.log("xhr: ", xhr.responseText);
+				console.log("status: ", status);
+				console.log("error: ", error);*/
+
+				result = xhr.responseText;
 			}
 		});
+
 		return result;
 	}
 });

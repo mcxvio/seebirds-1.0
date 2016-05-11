@@ -61,7 +61,7 @@ describe("Get an unordered list and its items", function() {
   });
 
   it("returns <ul><li> with passed text as item's styled header message", function() {
-    var html = getSelectChecklistsNotablesMessage(val).outerHTML;
+    var html = formatResponseMessage(val).outerHTML;
 
     expect(html).toEqual(jasmine.stringMatching('ul'));
     expect(html).toEqual(jasmine.stringMatching('li'));
@@ -146,4 +146,35 @@ describe("Get data html output", function() {
         var html = getSpeciesSightings(region, scientificName);
         expect(html).not.toBe("");
    });
+});
+
+describe("Get error message from json", function() {
+    var html = "";
+    var region = "Massachusetts (US-MA)";
+    var badregion = "Somesuch (XX-XX)";
+    var scientificName = "Hrundo rustica";
+    var locationId = "LXXXXXX";//"L248222";
+  beforeAll(function() {
+    console.log(html);
+  });    
+
+    it("returns correctly formatted species data" + html, function() {
+        html = getChecklistSubmissions(badregion);
+        expect(html).toBe("");
+    });
+
+    it("returns nothing for a bad region" + html, function() {
+        html = getNotableSightings(badregion, "message");
+        expect(html).toBe("");
+    });
+
+    it("returns nothing for bad location data" + html, function() {
+        html = getLocationSubmissions(locationId);
+        expect(html).toBe("");
+    });
+    
+    it("returns correctly formatted no species data found message" + html, function() {
+        html = getSpeciesSightings(region, scientificName);
+        expect(html).not.toBe("");
+    });
 });
