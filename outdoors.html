@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <!-- end jQM -->
-	<script src="script.custom/jquery-dateFormat.min.js"></script>
+    <script src="scripts/jquery-dateFormat.min.js"></script>
     <script>
         (function( $ ) {
             $(function() { // On document ready
@@ -32,16 +32,16 @@
                     $.mobile.loading( "hide" );
                 });
             });
-            
+
             // Call eBird for last checklist date and add after location name.
             $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
                 var ebird = "//ebird.org/ws1.1/data/obs/hotspot/recent?fmt=json&back=30&maxResults=1&r=";
-                
+
                 $('a[href*="/hotspot/"]').each(function(index) {
                     var visited = "";
                     var url = $(this).attr("href");
                     var hotspot = url.substr(url.lastIndexOf('/')+1);
-                    
+
                     $.ajax({
                         url: ebird + hotspot,
                         type: 'get',
