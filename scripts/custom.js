@@ -250,7 +250,7 @@ function getNotablesHtml(data, selection) {
 			var count = checklist[k].howMany || 'X'; //ternary operator.
 			var species = '<a href="#species" class="gotoSpecies" title="'+ checklist[k].comName + ' (' + checklist[k].sciName + ')' + '" target="_self">' + checklist[k].comName + '</a>';
             var location = '<a href="#location" class="gotoLocation" title="' + checklist[k].locID + '" target="_self">' + checklist[k].locName + '</a>';
-			var timeOut = '<a href="https://ebird.org/ebird/view/checklist?subID=' + checklist[k].subID + '" target="_blank">' + time + '</a>';
+			var timeOut = '<a href="https://ebird.org/ebird/view/checklist?subID=' + checklist[k].subID + '" class="external" target="_blank">' + time + '</a>';
 			var userName = checklist[k].userDisplayName;
 
 			var innerHtml = count + " " + species + " @ " + location + " @ " + timeOut + "<br> -- " + userName;
@@ -286,7 +286,7 @@ function getLocationHtml(data, locId) {
 		for (var k = 0; k < checklist.length; k++) {
 			var count = checklist[k].howMany || 'X'; //ternary operator.
 			var species = '<a href="#species" class="gotoSpecies" title="'+ checklist[k].comName + ' (' + checklist[k].sciName + ')' + '" target="_self">' + checklist[k].comName + '</a>';
-			var timeOut = '<a href="https://ebird.org/ebird/view/checklist?subID=' + checklist[k].subID + '" target="_blank">' + time + '</a>';
+			var timeOut = '<a href="https://ebird.org/ebird/view/checklist?subID=' + checklist[k].subID + '" class="external" target="_blank">' + time + '</a>';
             var userName = checklist[k].userDisplayName;
 
 			var innerHtml = count + " " + species + " @ " + timeOut + "<br>-- " + userName;
