@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <!-- end jQM -->
-	<script src="script.custom/jquery-dateFormat.min.js"></script>
+    <script src="scripts/jquery-dateFormat.min.js"></script>
     <script>
         (function( $ ) {
             $(function() { // On document ready
@@ -32,16 +32,16 @@
                     $.mobile.loading( "hide" );
                 });
             });
-            
+
             // Call eBird for last checklist date and add after location name.
             $(document).on("pagecreate", "div[data-role=page]", function(event, ui) {
                 var ebird = "//ebird.org/ws1.1/data/obs/hotspot/recent?fmt=json&back=30&maxResults=1&r=";
-                
+
                 $('a[href*="/hotspot/"]').each(function(index) {
                     var visited = "";
                     var url = $(this).attr("href");
                     var hotspot = url.substr(url.lastIndexOf('/')+1);
-                    
+
                     $.ajax({
                         url: ebird + hotspot,
                         type: 'get',
@@ -82,19 +82,19 @@
         <div role="main" class="ui-content">
             <h2>Hotspots</h2>
             <ul data-role="listview">
-                <li><a href="http://ebird.org/ebird/hotspot/L209928" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Boston Public Garden, MA USA</h2></a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L897808" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>McLaughlin Woods, MA USA</h2></a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L207391" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Mt. Auburn Cemetery, MA USA</h2></a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L1249718" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Olmsted Park, MA USA</h2></a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L248222" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Olmsted Park--Leverett Pond, MA USA</h2></a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L359383" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Olmsted Park--Ward's Pond, MA USA</h2></a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L3609670" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Olmsted Park--Willow Pond, MA USA</h2></a></li>
-                <li><a href="http://ebird.org/ebird/hotspot/L939078" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><h2>Titchwell Marsh RSPB Reserve, Norfolk UK</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L209928" target="_blank"><img src="images/outdoors_eBird_400x400.jpg"><h2>Boston Public Garden, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L897808" target="_blank"><img src="images/outdoors_eBird_400x400.jpg"><h2>McLaughlin Woods, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L207391" target="_blank"><img src="images/outdoors_eBird_400x400.jpg"><h2>Mt. Auburn Cemetery, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L1249718" target="_blank"><img src="images/outdoors_eBird_400x400.jpg"><h2>Olmsted Park, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L248222" target="_blank"><img src="images/outdoors_eBird_400x400.jpg"><h2>Olmsted Park--Leverett Pond, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L359383" target="_blank"><img src="images/outdoors_eBird_400x400.jpg"><h2>Olmsted Park--Ward's Pond, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L3609670" target="_blank"><img src="images/outdoors_eBird_400x400.jpg"><h2>Olmsted Park--Willow Pond, MA USA</h2></a></li>
+                <li><a href="http://ebird.org/ebird/hotspot/L939078" target="_blank"><img src="images/outdoors_eBird_400x400.jpg"><h2>Titchwell Marsh RSPB Reserve, Norfolk UK</h2></a></li>
             </ul>
             <h2>Sightings</h2>
             <ul data-role="listview">
-                <li><a href="http://birding.aba.org/mobiledigest/MASS" target="_blank"><img src="https://pbs.twimg.com/profile_images/645232119438966784/j4XNX3aj_400x400.jpg"><br>ABA Birding News, MA</a></li>
-                <li><a href="http://ebird.org/ebird/places" target="_blank"><img src="https://pbs.twimg.com/profile_images/232891959/eBird_400x400.jpg"><br>eBird: Explore Places</a></li>
+                <li><a href="http://birding.aba.org/mobiledigest/MASS" target="_blank"><img src="images/outdoors_aba.jpg"><br>ABA Birding News, MA</a></li>
+                <li><a href="http://ebird.org/ebird/places" target="_blank"><img src="images/outdoors_eBird_400x400.jpg"><br>eBird: Explore Places</a></li>
             </ul>
         </div>
         <div id="datepicker"></div>
