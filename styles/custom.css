@@ -55,7 +55,7 @@ div #info {
 .jqmobile-typeahead {
     padding: 0px 0px 0px 0px;
     margin-top: 0px;
-    margin-bottom: 0px;    
+    margin-bottom: 0px;
 }
 /**======== END TYPEAHEAD ========**/
 .gotoRegion {
@@ -100,11 +100,11 @@ div #info {
     background-size: cover;
 }
 #settings .ui-content {
-  min-height: 90vh !important;    
+  min-height: 90vh !important;
 }
 
 .ui-page {
-    background: transparent;
+    /*background: transparent;*/
 }
 .ui-content {
     background: transparent;

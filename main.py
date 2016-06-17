@@ -1,10 +1,24 @@
-import webapp2
+# +++++++++++ SEEBIRDS +++++++++++
+# WSGI to prove everything works.
+#
 
-class MainPage(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/html'
-        self.response.write('<html><head></head><body><div style="text-align: center; padding-left: 50px; padding-top: 50px; font-size: 1.75em;"><p>Welcome to Seebirds:</p><a href="index.html">Search</a></div></body></html>')
+SEEBIRDS_WELCOME = """<html>
+<head></head>
+<body>
+    <div style="text-align: center; padding-left: 50px; padding-top: 50px; font-size: 1.75em;">
+        <p>Welcome to Seebirds:</p><a href="index.html">Search</a>
+    </div>
+</body>
+</html>
+"""
 
-app = webapp2.WSGIApplication([
-    ('/', MainPage),
-], debug=True)
+def application(environ, start_response):
+    if environ.get('PATH_INFO') == '/seebirds/':
+        status = '200 OK'
+        content = SEEBIRDS_WELCOME
+    else:
+        status = '404 NOT FOUND'
+        content = 'Page not found.'
+    response_headers = [('Content-Type', 'text/html'), ('Content-Length', str(len(content)))]
+    start_response(status, response_headers)
+    yield content.encode('utf8')

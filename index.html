@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Hunt's eBirds</title>
+    <title>seebirds online</title>
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="scripts/jquery.formatDateTime.min.js"></script>
     <script src="scripts/custom.js"></script>
@@ -46,7 +46,7 @@
     				$( ".theme" ).text( themeClass );
     			});
     		});
-        
+
             var selectedData = { region: "", locId: "", locName: "", sciName: "", comName: "", startPage: "" };
 
             $(document).pagecontainer({ beforeshow: function(event, ui) { } });
@@ -55,17 +55,17 @@
                 // Set current copyright year.
                 $(".siteName").html(siteName);
                 $(".copyrightYear").html(new Date().getFullYear());
-        
+
                 var toPage = ui.toPage[0].id;
                 var page = "#" + toPage;
                 var message = noDataFound;
                 var data = "";
 
                 if (toPage == "checklists") {
-                    //removeTypeaheadBgColorStyle("typeahead-checklists");
+                    removeTypeaheadBgColorStyle("typeahead-checklists");
                 }
                 if (toPage == "notables") {
-                    //removeTypeaheadBgColorStyle("typeahead-notables");
+                    removeTypeaheadBgColorStyle("typeahead-notables");
                 }
                 if (toPage == "submissions") {
                     data = getChecklistSubmissions(selectedData.region, selectMessageChecklistSubmissions);
@@ -88,7 +88,7 @@
                     $(page + " #results").html(formatResponseMessage(message)); // Show nothing found message.
                 }
             });
-            
+
             // Save selected region from autocomplete.
             $(document).on("click", "a.gotoRegion", function() {
                 selectedData.region = $(this).text();
@@ -99,7 +99,7 @@
                 selectedData.locId = $(this).attr('title');
                 selectedData.locName = $(this).text();
             });
-        
+
             // Load species data.
             $(document).on("click", "a.gotoSpecies", function() {
                 var title = $(this).attr('title');
@@ -158,7 +158,7 @@
                     <li><a href="#submissions" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-left ui-btn-inline">close</a>
                     <li><a href="#checklists" id="gotoChecklists">checklists</a></li>
                     <li><a href="#notables" id="gotoNotables">notables</a></li>
-                    <li><a href="#settings">settings</a></li>                    
+                    <li><a href="#settings">settings</a></li>
                 </ul>
             </div>
         </div>
