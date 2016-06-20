@@ -1,6 +1,5 @@
 # +++++++++++ SEEBIRDS +++++++++++
 # WSGI to prove everything works.
-#
 
 SEEBIRDS_WELCOME = """<html>
 <head></head>
@@ -13,7 +12,7 @@ SEEBIRDS_WELCOME = """<html>
 """
 
 def application(environ, start_response):
-    if environ.get('PATH_INFO') == '/seebirds/':
+    if environ.get('PATH_INFO') == '/':
         status = '200 OK'
         content = SEEBIRDS_WELCOME
     else:

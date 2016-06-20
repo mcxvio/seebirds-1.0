@@ -110,3 +110,6 @@ div #info {
     background: transparent;
 }
 /**======== END IMAGE BACKGROUNDS ========**/
+.ui-li-divider {
+    font-size: medium !important;
+}
